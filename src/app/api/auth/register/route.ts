@@ -145,22 +145,6 @@ export async function POST(req: Request) {
     response.cookies.set("civix_ref", "", { path: "/", maxAge: 0 });
 
     return response;
-      citizen: {
-        id: citizenId,
-        username: username.trim(),
-        gameProfileId: cleanProfileId,
-      },
-    });
-
-    response.cookies.set("civix_session", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      path: "/",
-    });
-
-    return response;
   } catch (error: any) {
     console.error("Register error:", error);
     return NextResponse.json({ error: error.message || "Failed to create account" }, { status: 500 });
