@@ -15,6 +15,8 @@ export interface CivixCitizen {
   discordId?: string;
   avatarUrl?: string;
   verificationTier: "tier_1_citizen" | "tier_2_bank_verified" | "tier_3_sovereign";
+  referralCode?: string;
+  referredById?: string;
   isVerified: boolean;
   isAdmin: boolean;
   createdAt: string;
@@ -80,6 +82,8 @@ export async function getCurrentCitizen(): Promise<CivixCitizen | null> {
       discordId: r.discord_id ? String(r.discord_id) : undefined,
       avatarUrl: r.avatar_url ? String(r.avatar_url) : undefined,
       verificationTier: (r.verification_tier as any) || "tier_1_citizen",
+      referralCode: r.referral_code ? String(r.referral_code) : undefined,
+      referredById: r.referred_by_id ? String(r.referred_by_id) : undefined,
       isVerified: Boolean(r.is_verified),
       isAdmin: Boolean(r.is_admin),
       createdAt: String(r.created_at),

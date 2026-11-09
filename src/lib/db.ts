@@ -38,6 +38,8 @@ export async function initDb(): Promise<void> {
       discord_id TEXT,
       avatar_url TEXT,
       verification_tier TEXT DEFAULT 'tier_1_citizen',
+      referral_code TEXT UNIQUE,
+      referred_by_id TEXT,
       is_verified INTEGER DEFAULT 1,
       is_admin INTEGER DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now')),
@@ -45,10 +47,41 @@ export async function initDb(): Promise<void> {
     );
   `);
 
-  // Ensure verification_tier column exists for existing databases
+  // Ensure columns exist for existing databases
   try {
     await db.execute("ALTER TABLE civix_citizens ADD COLUMN verification_tier TEXT DEFAULT 'tier_1_citizen'");
   } catch {}
+  try {
+    await db.execute("ALTER TABLE civix_citizens ADD COLUMN referral_code TEXT");
+  } catch {}
+  try {
+    await db.execute("ALTER TABLE civix_citizens ADD COLUMN referred_by_id TEXT");
+  } catch {}
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS civix_referrals (
+      id TEXT PRIMARY KEY,
+      referrer_id TEXT NOT NULL REFERENCES civix_citizens(id),
+      referred_id TEXT NOT NULL REFERENCES civix_citizens(id),
+      referral_code TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(referrer_id, referred_id)
+    );
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS civix_notifications (
+      id TEXT PRIMARY KEY,
+      citizen_id TEXT NOT NULL REFERENCES civix_citizens(id),
+      app_id TEXT,
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      type TEXT DEFAULT 'info',
+      action_url TEXT,
+      is_read INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+  `);
 
   await db.execute(`
     CREATE TABLE IF NOT EXISTS civix_security_logs (

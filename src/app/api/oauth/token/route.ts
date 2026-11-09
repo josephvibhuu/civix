@@ -68,6 +68,18 @@ export async function POST(req: Request) {
     const citizen = citizenRes.rows[0];
     const citizenId = String(citizen.id);
 
+    // Fetch referral attribution if exists
+    let referrerUsername: string | null = null;
+    if (citizen.referred_by_id) {
+      const refQuery = await db.execute({
+        sql: "SELECT current_username FROM civix_citizens WHERE id = ?",
+        args: [citizen.referred_by_id],
+      });
+      if (refQuery.rows.length > 0) {
+        referrerUsername = String(refQuery.rows[0].current_username);
+      }
+    }
+
     // Banking-Grade KYC & Audit Data (for Bank of Europe and bourses)
     let kycPayload: any = {};
     if (scopes.some((s) => s.includes("banking") || s.includes("kyc"))) {
@@ -109,6 +121,8 @@ export async function POST(req: Request) {
       username: String(citizen.current_username),
       gameProfileId: String(citizen.game_profile_id),
       verificationTier: String(citizen.verification_tier || "tier_1_citizen"),
+      referralCode: citizen.referral_code ? String(citizen.referral_code) : undefined,
+      referredBy: referrerUsername || undefined,
       isVerified: Boolean(citizen.is_verified),
       scopes,
       ...kycPayload,
@@ -127,6 +141,8 @@ export async function POST(req: Request) {
         username: String(citizen.current_username),
         gameProfileId: String(citizen.game_profile_id),
         verificationTier: String(citizen.verification_tier || "tier_1_citizen"),
+        referralCode: citizen.referral_code ? String(citizen.referral_code) : undefined,
+        referredBy: referrerUsername || undefined,
         isVerified: Boolean(citizen.is_verified),
         ...(scopes.some((s) => s.includes("banking") || s.includes("kyc")) ? kycPayload : {}),
       },
