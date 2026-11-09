@@ -280,19 +280,51 @@ export async function GET(req) {
   });
 
   const { citizen } = await res.json();
-  // citizen: { id: "civ_...", username: "CardinalSanjay", gameProfileId: "cmuoy..." }
+  // citizen: { 
+  //   id: "civ_...", 
+  //   username: "CardinalSanjay", 
+  //   gameProfileId: "cmuoy...",
+  //   verificationTier: "tier_2_bank_verified"
+  // }
   
   // Set your own session cookie or log user in!
 }`}
               </pre>
             </div>
 
-            {/* Step 3 */}
+            {/* Banking & KYC Scopes */}
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-black text-black">
+                    3
+                  </span>
+                  Banking & Financial Underwriting Scope (<code className="text-emerald-400">banking:kyc</code>)
+                </h3>
+              </div>
+              <p className="text-xs text-zinc-400 mb-3">
+                Built specifically for financial institutions like <strong>Bank of Europe</strong> and equity exchanges like <strong>Grow UR Gold</strong>:
+              </p>
+              <pre className="overflow-x-auto rounded-lg bg-zinc-950 p-3.5 text-xs font-mono text-emerald-300 border border-zinc-800/80">
+{`// When requesting authorization with scope "identity banking:kyc"
+// Token exchange returns anti-sybil & credit data:
+{
+  "verificationTier": "tier_2_bank_verified",
+  "accountAgeDays": 45,
+  "nameHistory": [
+    { "previous": "Sanjay_V1", "updated": "CardinalSanjay", "syncedAt": "2026-10-18" }
+  ],
+  "isSanctioned": false
+}`}
+              </pre>
+            </div>
+
+            {/* Step 4 */}
             <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-[10px] font-black text-black">
-                    3
+                    4
                   </span>
                   Zero-DB Developer Storage (Civix Cloud BaaS)
                 </h3>

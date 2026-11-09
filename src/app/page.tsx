@@ -101,7 +101,7 @@ export default function HomePage() {
             </div>
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-              <span>Shared Gold Vault Escrow</span>
+              <span>Banking-Grade KYC & Anti-Sybil</span>
             </div>
           </div>
         </div>
@@ -176,7 +176,7 @@ export default function HomePage() {
 
             <p className="mt-3 text-xs sm:text-sm text-zinc-400 leading-relaxed">
               Don't waste weeks writing flaky deposit watchers, session databases, or password reset tickets. 
-              Drop in the <code className="text-sky-300 font-mono">@civix/sdk</code> for instant Single Sign-On, shared cloud storage, and automated gold clearing.
+              Drop in the <code className="text-sky-300 font-mono">@civix/sdk</code> for instant Single Sign-On, shared cloud storage, and banking-grade identity verification.
             </p>
 
             <div className="mt-6 flex flex-wrap items-center gap-4">

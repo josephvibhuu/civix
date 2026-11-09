@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb, initDb } from "@/lib/db";
+import { logSecurityEvent } from "@/lib/auth";
 import { SignJWT } from "jose";
 
 const JWT_SECRET = new TextEncoder().encode(
@@ -46,6 +47,7 @@ export async function POST(req: Request) {
     }
 
     const authRecord = codeRes.rows[0];
+    const scopes = String(authRecord.scope || "identity").split(/[\s,]+/);
 
     // Mark code as used
     await db.execute({
@@ -64,17 +66,52 @@ export async function POST(req: Request) {
     }
 
     const citizen = citizenRes.rows[0];
+    const citizenId = String(citizen.id);
+
+    // Banking-Grade KYC & Audit Data (for Bank of Europe and bourses)
+    let kycPayload: any = {};
+    if (scopes.some((s) => s.includes("banking") || s.includes("kyc"))) {
+      const historyRes = await db.execute({
+        sql: "SELECT previous_name, updated_name, synced_at FROM civix_username_history WHERE citizen_id = ? ORDER BY synced_at DESC LIMIT 5",
+        args: [citizenId],
+      });
+
+      const createdAtMs = new Date(String(citizen.created_at || Date.now())).getTime();
+      const accountAgeDays = Math.floor((Date.now() - createdAtMs) / (1000 * 60 * 60 * 24));
+
+      kycPayload = {
+        verificationTier: String(citizen.verification_tier || "tier_1_citizen"),
+        accountAgeDays,
+        nameHistory: historyRes.rows.map((r) => ({
+          previous: String(r.previous_name),
+          updated: String(r.updated_name),
+          syncedAt: String(r.synced_at),
+        })),
+        isSanctioned: false,
+      };
+    }
+
+    // Log the token exchange event for security audits
+    await logSecurityEvent(
+      citizenId,
+      "oauth_token_issued",
+      String(app.id),
+      undefined,
+      `Token issued to ${app.name} with scopes: ${scopes.join(", ")}`
+    );
 
     // Mint ID Token
     const idToken = await new SignJWT({
       iss: "https://civix.parlamentum",
-      sub: String(citizen.id),
+      sub: citizenId,
       aud: client_id,
-      citizenId: String(citizen.id),
+      citizenId,
       username: String(citizen.current_username),
       gameProfileId: String(citizen.game_profile_id),
-      vaultGold: Number(citizen.vault_gold || 0),
+      verificationTier: String(citizen.verification_tier || "tier_1_citizen"),
       isVerified: Boolean(citizen.is_verified),
+      scopes,
+      ...kycPayload,
     })
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
@@ -86,11 +123,12 @@ export async function POST(req: Request) {
       token_type: "Bearer",
       expires_in: 86400,
       citizen: {
-        id: String(citizen.id),
+        id: citizenId,
         username: String(citizen.current_username),
         gameProfileId: String(citizen.game_profile_id),
-        vaultGold: Number(citizen.vault_gold || 0),
+        verificationTier: String(citizen.verification_tier || "tier_1_citizen"),
         isVerified: Boolean(citizen.is_verified),
+        ...(scopes.some((s) => s.includes("banking") || s.includes("kyc")) ? kycPayload : {}),
       },
     });
   } catch (error: any) {

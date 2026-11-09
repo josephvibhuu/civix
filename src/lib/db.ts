@@ -37,11 +37,28 @@ export async function initDb(): Promise<void> {
       email TEXT,
       discord_id TEXT,
       avatar_url TEXT,
-      vault_gold REAL DEFAULT 0.00,
+      verification_tier TEXT DEFAULT 'tier_1_citizen',
       is_verified INTEGER DEFAULT 1,
       is_admin INTEGER DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
+    );
+  `);
+
+  // Ensure verification_tier column exists for existing databases
+  try {
+    await db.execute("ALTER TABLE civix_citizens ADD COLUMN verification_tier TEXT DEFAULT 'tier_1_citizen'");
+  } catch {}
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS civix_security_logs (
+      id TEXT PRIMARY KEY,
+      citizen_id TEXT NOT NULL REFERENCES civix_citizens(id),
+      event_type TEXT NOT NULL,
+      app_id TEXT,
+      ip_hint TEXT,
+      details TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
     );
   `);
 
@@ -199,15 +216,15 @@ export async function initDb(): Promise<void> {
         id: "app_bank_europe",
         name: "Bank of Europe",
         slug: "bank-of-europe",
-        tagline: "Sovereign Banking, Term Deposits & Fractional Lending",
-        description: "Earn passive yield on gold reserves, issue sovereign debt bonds, and access institutional liquidity backed by Milanese vaults.",
+        tagline: "Official Sovereign Banking, Term Deposits & Fractional Lending",
+        description: "The primary banking & liquidity institution of the realm. Earn passive yield on gold reserves, issue sovereign debt bonds, and access institutional credit backed by Milanese vaults.",
         category: "finance",
         app_url: "https://bankofmilan.pages.dev",
         client_id: "civ_client_bankeurope_live",
         client_secret_hash: "secret_bank_preview",
         redirect_uris: JSON.stringify(["https://bankofmilan.pages.dev/civix/callback"]),
         owner_name: "BankerMilan",
-        active_users_estimate: 160,
+        active_users_estimate: 280,
         featured: 1,
         verified: 1,
       },

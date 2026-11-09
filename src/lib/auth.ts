@@ -14,7 +14,7 @@ export interface CivixCitizen {
   email?: string;
   discordId?: string;
   avatarUrl?: string;
-  vaultGold: number;
+  verificationTier: "tier_1_citizen" | "tier_2_bank_verified" | "tier_3_sovereign";
   isVerified: boolean;
   isAdmin: boolean;
   createdAt: string;
@@ -79,13 +79,33 @@ export async function getCurrentCitizen(): Promise<CivixCitizen | null> {
       email: r.email ? String(r.email) : undefined,
       discordId: r.discord_id ? String(r.discord_id) : undefined,
       avatarUrl: r.avatar_url ? String(r.avatar_url) : undefined,
-      vaultGold: Number(r.vault_gold || 0),
+      verificationTier: (r.verification_tier as any) || "tier_1_citizen",
       isVerified: Boolean(r.is_verified),
       isAdmin: Boolean(r.is_admin),
       createdAt: String(r.created_at),
     };
   } catch {
     return null;
+  }
+}
+
+export async function logSecurityEvent(
+  citizenId: string,
+  eventType: string,
+  appId?: string,
+  ipHint?: string,
+  details?: string
+): Promise<void> {
+  try {
+    const db = getDb();
+    const logId = `sec_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    await db.execute({
+      sql: `INSERT INTO civix_security_logs (id, citizen_id, event_type, app_id, ip_hint, details)
+            VALUES (?, ?, ?, ?, ?, ?)`,
+      args: [logId, citizenId, eventType, appId || null, ipHint || null, details || null],
+    });
+  } catch (e) {
+    console.error("Security log error:", e);
   }
 }
 

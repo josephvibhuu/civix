@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb, initDb } from "@/lib/db";
-import { verifyPassword, createSessionToken, syncInGameUsername } from "@/lib/auth";
+import { verifyPassword, createSessionToken, syncInGameUsername, logSecurityEvent } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -45,13 +45,15 @@ export async function POST(req: Request) {
       gameProfileId: String(citizen.game_profile_id),
     });
 
+    await logSecurityEvent(String(citizen.id), "login", undefined, undefined, "Citizen logged in");
+
     const response = NextResponse.json({
       success: true,
       citizen: {
         id: String(citizen.id),
         username: String(citizen.current_username),
         gameProfileId: String(citizen.game_profile_id),
-        vaultGold: Number(citizen.vault_gold || 0),
+        verificationTier: String(citizen.verification_tier || "tier_1_citizen"),
         isAdmin: Boolean(citizen.is_admin),
       },
     });

@@ -8,7 +8,8 @@ interface Citizen {
   id: string;
   currentUsername: string;
   gameProfileId: string;
-  vaultGold: number;
+  verificationTier?: string;
+  isVerified: boolean;
 }
 
 export default function CivixNavbar() {
@@ -88,10 +89,16 @@ export default function CivixNavbar() {
             <div className="h-8 w-24 animate-pulse rounded bg-zinc-800" />
           ) : citizen ? (
             <div className="flex items-center gap-3">
-              <div className="hidden sm:flex items-center gap-1.5 rounded-md border border-amber-500/20 bg-amber-500/5 px-2.5 py-1 text-xs">
-                <Coins className="h-3.5 w-3.5 text-amber-400" />
-                <span className="font-semibold text-amber-300">{citizen.vaultGold.toFixed(2)}</span>
-                <span className="text-[10px] text-zinc-400">Vault Gold</span>
+              <div className="hidden sm:flex items-center gap-1.5 rounded-md border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-1 text-xs">
+                <Shield className="h-3.5 w-3.5 text-emerald-400" />
+                <span className="font-semibold text-emerald-300">
+                  {citizen.verificationTier === "tier_3_sovereign"
+                    ? "Sovereign"
+                    : citizen.verificationTier === "tier_2_bank_verified"
+                    ? "Bank Verified"
+                    : "Verified Citizen"}
+                </span>
+                <span className="text-[10px] text-zinc-500 font-mono">KYC-1</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 border border-zinc-700 text-xs font-bold text-amber-400">
