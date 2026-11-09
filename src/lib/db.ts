@@ -164,17 +164,6 @@ export async function initDb(): Promise<void> {
     );
   `);
 
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS civix_developer_storage (
-      app_id TEXT NOT NULL REFERENCES civix_apps(id),
-      citizen_id TEXT NOT NULL REFERENCES civix_citizens(id),
-      storage_key TEXT NOT NULL,
-      storage_value TEXT NOT NULL,
-      updated_at TEXT DEFAULT (datetime('now')),
-      PRIMARY KEY (app_id, citizen_id, storage_key)
-    );
-  `);
-
   // Seed default 5 ecosystem apps if not present
   const existingApps = await db.execute("SELECT COUNT(*) as count FROM civix_apps");
   const count = Number(existingApps.rows[0]?.count || 0);

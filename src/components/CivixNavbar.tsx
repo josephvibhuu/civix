@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
-import { Shield, Sparkles, LogIn, LogOut, Code2, Compass, KeyRound, ExternalLink, Users, Bell, CheckCircle2 } from "lucide-react";
+import { Layers, Sparkles, LogIn, LogOut, Code2, Compass, KeyRound, ExternalLink, Users, Bell, Shield } from "lucide-react";
 
 interface Citizen {
   id: string;
@@ -37,7 +37,6 @@ export default function CivixNavbar() {
       .then((d) => {
         if (d.authenticated) {
           setCitizen(d.citizen);
-          // Fetch notifications
           fetch("/api/notifications")
             .then((nr) => nr.json())
             .then((nd) => {
@@ -82,24 +81,24 @@ export default function CivixNavbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-cyan-900/30 bg-[#080b12]/85 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand */}
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 via-amber-500 to-amber-700 shadow-md shadow-amber-500/20 group-hover:scale-105 transition-transform">
-              <Shield className="h-5 w-5 text-zinc-950 stroke-[2.5]" />
-              <div className="absolute inset-0 rounded-lg ring-1 ring-inset ring-white/25" />
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 via-sky-500 to-indigo-600 shadow-md shadow-cyan-500/20 group-hover:shadow-cyan-400/40 group-hover:scale-105 transition-all">
+              <Layers className="h-5 w-5 text-zinc-950 stroke-[2.3]" />
+              <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/30" />
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-black tracking-tight text-white flex items-center gap-1.5">
                 CIVIX
-                <span className="rounded bg-amber-400/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-400 border border-amber-400/20">
-                  HUB
+                <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-[9px] font-extrabold text-cyan-400 border border-cyan-500/30 tracking-widest uppercase">
+                  NEXUS
                 </span>
               </span>
-              <span className="text-[10px] font-medium text-zinc-400 tracking-wider uppercase -mt-0.5">
-                Parlamentum Ecosystem
+              <span className="text-[10px] font-semibold text-cyan-400/70 tracking-widest uppercase -mt-0.5">
+                Universal Identity
               </span>
             </div>
           </Link>
@@ -108,24 +107,24 @@ export default function CivixNavbar() {
           <nav className="hidden md:flex items-center gap-1">
             <Link
               href="/"
-              className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
             >
-              <Compass className="h-4 w-4 text-amber-400" />
+              <Compass className="h-4 w-4 text-cyan-400" />
               App Store
             </Link>
             <Link
               href="/referrals"
-              className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 transition-colors"
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-sky-400 hover:text-sky-300 hover:bg-sky-500/10 transition-colors"
             >
-              <Users className="h-4 w-4 text-emerald-400" />
+              <Users className="h-4 w-4 text-sky-400" />
               Universal Referrals
             </Link>
             <Link
               href="/developers"
-              className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
             >
-              <Code2 className="h-4 w-4 text-sky-400" />
-              Developer BaaS & SDK
+              <Code2 className="h-4 w-4 text-indigo-400" />
+              Developer SDK
             </Link>
           </nav>
         </div>
@@ -141,28 +140,28 @@ export default function CivixNavbar() {
                 <button
                   type="button"
                   onClick={() => setShowNotifs((o) => !o)}
-                  className="relative rounded-lg p-2 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
+                  className="relative rounded-lg p-2 text-zinc-400 hover:bg-white/5 hover:text-cyan-300 transition-colors"
                   title="Universal Ecosystem Notifications"
                 >
                   <Bell className="h-4 w-4" />
                   {unreadCount > 0 && (
-                    <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-black text-black animate-pulse">
+                    <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-cyan-400 text-[9px] font-black text-black animate-pulse">
                       {unreadCount}
                     </span>
                   )}
                 </button>
 
                 {showNotifs && (
-                  <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-xl border border-zinc-800 bg-zinc-950 p-4 shadow-2xl z-50">
+                  <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-xl border border-cyan-900/40 bg-[#0a0e17] p-4 shadow-2xl z-50">
                     <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-3">
                       <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <Bell className="h-3.5 w-3.5 text-amber-400" />
+                        <Bell className="h-3.5 w-3.5 text-cyan-400" />
                         Ecosystem Inbox
                       </span>
                       {unreadCount > 0 && (
                         <button
                           onClick={handleMarkAllRead}
-                          className="text-[11px] text-amber-400 hover:underline"
+                          className="text-[11px] text-cyan-400 hover:underline"
                         >
                           Mark all as read
                         </button>
@@ -181,7 +180,7 @@ export default function CivixNavbar() {
                             className={`rounded-lg p-2.5 text-xs transition-colors border ${
                               n.isRead
                                 ? "bg-zinc-900/40 border-zinc-900 text-zinc-400"
-                                : "bg-zinc-900/90 border-amber-500/30 text-zinc-200"
+                                : "bg-cyan-950/20 border-cyan-500/30 text-zinc-200"
                             }`}
                           >
                             <div className="flex items-center justify-between mb-1">
@@ -195,7 +194,7 @@ export default function CivixNavbar() {
                               <Link
                                 href={n.actionUrl}
                                 onClick={() => setShowNotifs(false)}
-                                className="inline-block mt-2 text-[10px] font-semibold text-amber-400 hover:underline"
+                                className="inline-block mt-2 text-[10px] font-semibold text-cyan-400 hover:underline"
                               >
                                 View Details →
                               </Link>
@@ -209,9 +208,9 @@ export default function CivixNavbar() {
               </div>
 
               {/* Citizen KYC Badge */}
-              <div className="hidden sm:flex items-center gap-1.5 rounded-md border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-1 text-xs">
-                <Shield className="h-3.5 w-3.5 text-emerald-400" />
-                <span className="font-semibold text-emerald-300">
+              <div className="hidden sm:flex items-center gap-1.5 rounded-md border border-cyan-500/20 bg-cyan-500/5 px-2.5 py-1 text-xs">
+                <Shield className="h-3.5 w-3.5 text-cyan-400" />
+                <span className="font-semibold text-cyan-300">
                   {citizen.verificationTier === "tier_3_sovereign"
                     ? "Sovereign"
                     : citizen.verificationTier === "tier_2_bank_verified"
@@ -223,7 +222,7 @@ export default function CivixNavbar() {
 
               {/* Citizen Avatar & Logout */}
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 border border-zinc-700 text-xs font-bold text-amber-400">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-950 border border-cyan-500/30 text-xs font-bold text-cyan-300">
                   {citizen.currentUsername[0]?.toUpperCase()}
                 </div>
                 <div className="hidden md:flex flex-col text-left">
@@ -233,7 +232,7 @@ export default function CivixNavbar() {
                 <button
                   onClick={handleLogout}
                   title="Sign out"
-                  className="rounded-md p-1.5 text-zinc-400 hover:bg-zinc-900 hover:text-red-400 transition-colors ml-1"
+                  className="rounded-md p-1.5 text-zinc-400 hover:bg-white/5 hover:text-red-400 transition-colors ml-1"
                 >
                   <LogOut className="h-4 w-4" />
                 </button>
@@ -243,7 +242,7 @@ export default function CivixNavbar() {
             <div className="flex items-center gap-2">
               <Link
                 href="/login"
-                className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-3.5 py-1.5 text-xs font-bold text-zinc-950 shadow-md shadow-amber-500/10 hover:from-amber-400 hover:to-amber-500 transition-all active:scale-95"
+                className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-sky-500 px-3.5 py-1.5 text-xs font-bold text-zinc-950 shadow-md shadow-cyan-500/20 hover:from-cyan-400 hover:to-sky-400 transition-all active:scale-95"
               >
                 <LogIn className="h-3.5 w-3.5 stroke-[2.5]" />
                 Sign In with Civix

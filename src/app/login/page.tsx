@@ -3,7 +3,7 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Shield, KeyRound, Sparkles, UserPlus, RefreshCw, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react";
+import { Layers, KeyRound, Sparkles, UserPlus, RefreshCw, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react";
 
 function LoginForm() {
   const router = useRouter();
@@ -26,6 +26,7 @@ function LoginForm() {
   const [regPassword, setRegPassword] = useState("");
   const [regEmail, setRegEmail] = useState("");
   const [regDiscord, setRegDiscord] = useState("");
+  const [regRefCode, setRegRefCode] = useState("");
 
   // Recover form state
   const [recIdentifier, setRecIdentifier] = useState("");
@@ -77,12 +78,13 @@ function LoginForm() {
           password: regPassword,
           email: regEmail,
           discordId: regDiscord,
+          referralCode: regRefCode,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Registration failed");
 
-      setSuccess("Account passport created! Redirecting...");
+      setSuccess("Sovereign Passport created! Redirecting...");
       setTimeout(() => {
         if (returnTo.startsWith("http")) {
           window.location.href = returnTo;
@@ -151,12 +153,12 @@ function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900/90 p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+    <div className="w-full max-w-md rounded-3xl border border-cyan-950/60 bg-[#0a0f1d]/90 p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
       {/* Brand Header */}
       <div className="text-center mb-6">
-        <Link href="/" className="inline-flex items-center gap-2 mb-2 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-amber-700 shadow-md shadow-amber-500/20">
-            <Shield className="h-5 w-5 text-zinc-950 stroke-[2.5]" />
+        <Link href="/" className="inline-flex items-center gap-2.5 mb-2 group">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 via-sky-500 to-indigo-600 shadow-md shadow-cyan-500/20">
+            <Layers className="h-5 w-5 text-zinc-950 stroke-[2.3]" />
           </div>
           <span className="text-2xl font-black tracking-tight text-white">CIVIX ID</span>
         </Link>
@@ -166,14 +168,14 @@ function LoginForm() {
       </div>
 
       {/* Tabs */}
-      <div className="grid grid-cols-3 gap-1 rounded-lg bg-zinc-950 p-1 mb-6 text-xs font-semibold">
+      <div className="grid grid-cols-3 gap-1 rounded-xl bg-black/60 p-1 mb-6 text-xs font-semibold border border-zinc-800/80">
         <button
           onClick={() => {
             setTab("login");
             setError(null);
           }}
-          className={`rounded-md py-1.5 transition-all ${
-            tab === "login" ? "bg-amber-500 text-zinc-950" : "text-zinc-400 hover:text-white"
+          className={`rounded-lg py-2 transition-all ${
+            tab === "login" ? "bg-cyan-500 text-black shadow-md shadow-cyan-500/25" : "text-zinc-400 hover:text-white"
           }`}
         >
           Sign In
@@ -183,8 +185,8 @@ function LoginForm() {
             setTab("register");
             setError(null);
           }}
-          className={`rounded-md py-1.5 transition-all ${
-            tab === "register" ? "bg-amber-500 text-zinc-950" : "text-zinc-400 hover:text-white"
+          className={`rounded-lg py-2 transition-all ${
+            tab === "register" ? "bg-cyan-500 text-black shadow-md shadow-cyan-500/25" : "text-zinc-400 hover:text-white"
           }`}
         >
           Register
@@ -194,8 +196,8 @@ function LoginForm() {
             setTab("recover");
             setError(null);
           }}
-          className={`rounded-md py-1.5 transition-all ${
-            tab === "recover" ? "bg-amber-500 text-zinc-950" : "text-zinc-400 hover:text-white"
+          className={`rounded-lg py-2 transition-all ${
+            tab === "recover" ? "bg-cyan-500 text-black shadow-md shadow-cyan-500/25" : "text-zinc-400 hover:text-white"
           }`}
         >
           Recovery
@@ -203,14 +205,14 @@ function LoginForm() {
       </div>
 
       {error && (
-        <div className="mb-4 flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-300">
+        <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-300">
           <AlertCircle className="h-4 w-4 shrink-0 text-red-400" />
           <span>{error}</span>
         </div>
       )}
 
       {success && (
-        <div className="mb-4 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300">
+        <div className="mb-4 flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300">
           <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
           <span>{success}</span>
         </div>
@@ -229,7 +231,7 @@ function LoginForm() {
               placeholder="e.g. CardinalSanjay or cmuoybywtfi0nym..."
               value={loginId}
               onChange={(e) => setLoginId(e.target.value)}
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-950 p-2.5 text-zinc-100 placeholder-zinc-600 outline-none focus:border-amber-500"
+              className="w-full rounded-xl border border-zinc-800 bg-black p-2.5 text-zinc-100 placeholder-zinc-600 outline-none focus:border-cyan-400"
             />
           </div>
 
@@ -241,26 +243,26 @@ function LoginForm() {
               placeholder="••••••••"
               value={loginPassword}
               onChange={(e) => setLoginPassword(e.target.value)}
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-950 p-2.5 text-zinc-100 placeholder-zinc-600 outline-none focus:border-amber-500"
+              className="w-full rounded-xl border border-zinc-800 bg-black p-2.5 text-zinc-100 placeholder-zinc-600 outline-none focus:border-cyan-400"
             />
           </div>
 
           <div className="pt-1">
             <details className="text-[11px] text-zinc-400 group">
-              <summary className="cursor-pointer text-amber-400 hover:text-amber-300 font-medium">
+              <summary className="cursor-pointer text-cyan-400 hover:text-cyan-300 font-medium">
                 Changed your in-game name recently? (Click to sync)
               </summary>
-              <div className="mt-2 p-2.5 rounded border border-zinc-800 bg-zinc-950/80">
+              <div className="mt-2 p-2.5 rounded-xl border border-zinc-800 bg-black/80">
                 <label className="block text-zinc-300 mb-1">New in-game handle:</label>
                 <input
                   type="text"
                   placeholder="e.g. Dinomite_New"
                   value={updatedInGameName}
                   onChange={(e) => setUpdatedInGameName(e.target.value)}
-                  className="w-full rounded border border-zinc-700 bg-zinc-900 p-1.5 text-zinc-100"
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-900 p-1.5 text-zinc-100"
                 />
                 <p className="mt-1 text-[10px] text-zinc-500">
-                  Civix will automatically update your display name across GUG, Colosseo, and all apps.
+                  Civix will automatically update your display name across GUG and all connected apps.
                 </p>
               </div>
             </details>
@@ -269,7 +271,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 p-2.5 font-bold text-zinc-950 hover:from-amber-400 hover:to-amber-500 transition-all disabled:opacity-50 mt-2"
+            className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-sky-500 p-2.5 font-bold text-black hover:from-cyan-400 hover:to-sky-400 transition-all disabled:opacity-50 mt-2 shadow-lg shadow-cyan-500/25"
           >
             {loading ? "Authenticating..." : "Sign In with Civix"}
           </button>
@@ -287,7 +289,7 @@ function LoginForm() {
               placeholder="e.g. CardinalSanjay"
               value={regUsername}
               onChange={(e) => setRegUsername(e.target.value)}
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-950 p-2 text-zinc-100 outline-none focus:border-amber-500"
+              className="w-full rounded-xl border border-zinc-800 bg-black p-2 text-zinc-100 outline-none focus:border-cyan-400"
             />
           </div>
 
@@ -301,10 +303,10 @@ function LoginForm() {
               placeholder="e.g. cmuoybywtfi0nymjndf95o0kx or profile link"
               value={regProfileId}
               onChange={(e) => setRegProfileId(e.target.value)}
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-950 p-2 text-zinc-100 outline-none focus:border-amber-500"
+              className="w-full rounded-xl border border-zinc-800 bg-black p-2 text-zinc-100 outline-none focus:border-cyan-400"
             />
             <span className="text-[10px] text-zinc-500">
-              Anchors your account permanently even if you change names in game.
+              Anchors your account permanently even if you change names in-game.
             </span>
           </div>
 
@@ -316,7 +318,18 @@ function LoginForm() {
               placeholder="Choose a strong password"
               value={regPassword}
               onChange={(e) => setRegPassword(e.target.value)}
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-950 p-2 text-zinc-100 outline-none focus:border-amber-500"
+              className="w-full rounded-xl border border-zinc-800 bg-black p-2 text-zinc-100 outline-none focus:border-cyan-400"
+            />
+          </div>
+
+          <div>
+            <label className="block font-medium text-zinc-400 mb-1">Referral Code (Optional)</label>
+            <input
+              type="text"
+              placeholder="e.g. JOSEPH"
+              value={regRefCode}
+              onChange={(e) => setRegRefCode(e.target.value)}
+              className="w-full rounded-xl border border-zinc-800 bg-black p-2 text-zinc-100 uppercase font-mono"
             />
           </div>
 
@@ -328,7 +341,7 @@ function LoginForm() {
                 placeholder="citizen@domain.com"
                 value={regEmail}
                 onChange={(e) => setRegEmail(e.target.value)}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-950 p-2 text-zinc-100"
+                className="w-full rounded-xl border border-zinc-800 bg-black p-2 text-zinc-100"
               />
             </div>
             <div>
@@ -338,7 +351,7 @@ function LoginForm() {
                 placeholder="@username"
                 value={regDiscord}
                 onChange={(e) => setRegDiscord(e.target.value)}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-950 p-2 text-zinc-100"
+                className="w-full rounded-xl border border-zinc-800 bg-black p-2 text-zinc-100"
               />
             </div>
           </div>
@@ -346,7 +359,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-amber-500 p-2.5 font-bold text-zinc-950 hover:bg-amber-400 transition-all disabled:opacity-50 mt-2"
+            className="w-full rounded-xl bg-cyan-500 p-2.5 font-bold text-black hover:bg-cyan-400 transition-all disabled:opacity-50 mt-2 shadow-lg shadow-cyan-500/25"
           >
             {loading ? "Creating Passport..." : "Create Civix Passport"}
           </button>
@@ -372,28 +385,28 @@ function LoginForm() {
                   placeholder="e.g. CardinalSanjay"
                   value={recIdentifier}
                   onChange={(e) => setRecIdentifier(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-950 p-2.5 text-zinc-100 outline-none focus:border-amber-500"
+                  className="w-full rounded-xl border border-zinc-800 bg-black p-2.5 text-zinc-100 outline-none focus:border-cyan-400"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-lg bg-sky-500 p-2.5 font-bold text-zinc-950 hover:bg-sky-400 transition-all disabled:opacity-50"
+                className="w-full rounded-xl bg-sky-500 p-2.5 font-bold text-black hover:bg-sky-400 transition-all disabled:opacity-50"
               >
                 {loading ? "Generating..." : "Generate Notary Verification Memo"}
               </button>
             </form>
           ) : (
             <form onSubmit={handleCompleteRecovery} className="space-y-3">
-              <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
-                <span className="block text-[10px] uppercase font-bold text-amber-400 mb-1">
+              <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-3">
+                <span className="block text-[10px] uppercase font-bold text-cyan-300 mb-1">
                   Step 1: Send in-game contract
                 </span>
                 <p className="text-[11px] text-zinc-300">
                   Send 1 Raw Iron in Parlamentum with contract note:
                 </p>
-                <div className="mt-1.5 flex items-center justify-between rounded bg-zinc-950 px-2 py-1.5 font-mono text-amber-300 font-bold">
+                <div className="mt-1.5 flex items-center justify-between rounded-lg bg-black px-2.5 py-2 font-mono text-cyan-300 font-bold border border-zinc-800">
                   <span>{recMemo}</span>
                 </div>
               </div>
@@ -408,7 +421,7 @@ function LoginForm() {
                   placeholder="e.g. 849201"
                   value={recCode}
                   onChange={(e) => setRecCode(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-950 p-2 text-zinc-100 font-mono tracking-widest text-center"
+                  className="w-full rounded-xl border border-zinc-800 bg-black p-2 text-zinc-100 font-mono tracking-widest text-center"
                 />
               </div>
 
@@ -422,14 +435,14 @@ function LoginForm() {
                   placeholder="Choose new password"
                   value={recNewPassword}
                   onChange={(e) => setRecNewPassword(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-950 p-2 text-zinc-100"
+                  className="w-full rounded-xl border border-zinc-800 bg-black p-2 text-zinc-100"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-lg bg-emerald-500 p-2.5 font-bold text-zinc-950 hover:bg-emerald-400 transition-all disabled:opacity-50"
+                className="w-full rounded-xl bg-emerald-500 p-2.5 font-bold text-black hover:bg-emerald-400 transition-all disabled:opacity-50"
               >
                 {loading ? "Verifying..." : "Reset Password & Restore Account"}
               </button>
@@ -443,7 +456,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-[#07090e] flex flex-col justify-center items-center p-4">
+    <div className="min-h-screen bg-[#06080e] flex flex-col justify-center items-center p-4">
       <Suspense fallback={<div className="text-zinc-500 text-xs">Loading Civix ID...</div>}>
         <LoginForm />
       </Suspense>
