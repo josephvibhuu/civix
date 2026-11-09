@@ -163,6 +163,7 @@ export async function initDb(): Promise<void> {
         active_users_estimate: 320,
         featured: 1,
         verified: 1,
+        status: "active",
       },
       {
         id: "app_prediction",
@@ -177,8 +178,9 @@ export async function initDb(): Promise<void> {
         redirect_uris: JSON.stringify(["https://prediction-market.stakkiesstaks.workers.dev/auth/civix"]),
         owner_name: "Stakkie",
         active_users_estimate: 240,
-        featured: 1,
-        verified: 1,
+        featured: 0,
+        verified: 0,
+        status: "pending",
       },
       {
         id: "app_colosseo",
@@ -193,8 +195,9 @@ export async function initDb(): Promise<void> {
         redirect_uris: JSON.stringify(["https://colosseo-tau.vercel.app/api/auth/civix"]),
         owner_name: "GladiatorGuild",
         active_users_estimate: 185,
-        featured: 1,
-        verified: 1,
+        featured: 0,
+        verified: 0,
+        status: "pending",
       },
       {
         id: "app_casino",
@@ -209,8 +212,9 @@ export async function initDb(): Promise<void> {
         redirect_uris: JSON.stringify(["https://back-room-casino.vercel.app/auth/civix"]),
         owner_name: "Syndicate",
         active_users_estimate: 210,
-        featured: 1,
-        verified: 1,
+        featured: 0,
+        verified: 0,
+        status: "pending",
       },
       {
         id: "app_bank_europe",
@@ -225,8 +229,9 @@ export async function initDb(): Promise<void> {
         redirect_uris: JSON.stringify(["https://bankofmilan.pages.dev/civix/callback"]),
         owner_name: "BankerMilan",
         active_users_estimate: 280,
-        featured: 1,
-        verified: 1,
+        featured: 0,
+        verified: 0,
+        status: "pending",
       },
     ];
 
@@ -234,8 +239,8 @@ export async function initDb(): Promise<void> {
       await db.execute({
         sql: `INSERT INTO civix_apps (
           id, name, slug, tagline, description, category, app_url, client_id, 
-          client_secret_hash, redirect_uris, owner_name, active_users_estimate, featured, verified
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          client_secret_hash, redirect_uris, owner_name, active_users_estimate, featured, verified, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [
           app.id,
           app.name,
@@ -251,6 +256,7 @@ export async function initDb(): Promise<void> {
           app.active_users_estimate,
           app.featured,
           app.verified,
+          app.status,
         ],
       });
     }
