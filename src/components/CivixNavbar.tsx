@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { 
   Layers, Sparkles, LogIn, LogOut, Code2, Compass, Shield, 
-  Users, Bell, Search, ShieldAlert, ChevronDown, User, ExternalLink 
+  Users, Bell, Search, ShieldAlert, ChevronDown, User, ExternalLink, Smartphone 
 } from "lucide-react";
 import CommandPalette from "./CommandPalette";
 import { AppItem } from "./AppCard";
@@ -136,6 +136,13 @@ export default function CivixNavbar({ apps = [] }: { apps?: AppItem[] }) {
               >
                 <Compass className="h-3.5 w-3.5 text-cyan-400" />
                 Store
+              </Link>
+              <Link
+                href="/device"
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-cyan-300 hover:text-white hover:bg-cyan-500/10 transition-colors"
+              >
+                <Smartphone className="h-3.5 w-3.5 text-cyan-400" />
+                Pocket Device
               </Link>
               <Link
                 href="/dashboard"

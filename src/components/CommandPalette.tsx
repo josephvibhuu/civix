@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
-import { Search, Compass, Users, Code2, Shield, ExternalLink, Zap, ArrowRight } from "lucide-react";
+import { Search, Compass, Users, Code2, Shield, ExternalLink, Zap, ArrowRight, Smartphone } from "lucide-react";
 import { AppItem } from "./AppCard";
 
 interface Props {
@@ -99,6 +99,19 @@ export default function CommandPalette({ apps = [], isOpen, onClose }: Props) {
 
             {/* Quick Actions */}
             <Command.Group heading={<span className="text-[10px] font-bold text-zinc-500 uppercase px-2 py-1 block tracking-wider mt-2">Navigation & Tools</span>}>
+              <Command.Item
+                value="Pocket Device Mobile Phone Simulator Edicts"
+                onSelect={() => {
+                  onClose();
+                  router.push("/device");
+                }}
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-zinc-300 cursor-pointer hover:bg-cyan-500/10 hover:text-cyan-300 transition-colors aria-selected:bg-cyan-500/10 aria-selected:text-cyan-300"
+              >
+                <Smartphone className="h-4 w-4 text-cyan-400" />
+                <span className="font-semibold text-cyan-300">Open CIVIX Pocket Device</span>
+                <span className="ml-auto text-[9px] font-mono px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300">Mobile Shell</span>
+              </Command.Item>
+
               <Command.Item
                 value="App Store Explore"
                 onSelect={() => {
