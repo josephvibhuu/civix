@@ -1,8 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import CivixNavbar from "@/components/CivixNavbar";
-import { Code2, Key, Layers, Copy, Check, ShieldCheck, Zap, Terminal, Globe, PlusCircle, Sparkles } from "lucide-react";
+import { 
+  Code2, Key, Layers, Copy, Check, ShieldCheck, Zap, 
+  Terminal, Globe, PlusCircle, Sparkles, ExternalLink, ArrowRight, Shield 
+} from "lucide-react";
+import { toast } from "sonner";
 
 export default function DevelopersPage() {
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
@@ -24,9 +29,31 @@ export default function DevelopersPage() {
     redirectUri: string;
   } | null>(null);
 
+  const [myApps, setMyApps] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.authenticated && d.citizen) {
+          fetch("/api/apps")
+            .then((ar) => ar.json())
+            .then((ad) => {
+              if (ad.apps) {
+                const mine = ad.apps.filter((a: any) => a.ownerName === d.citizen.currentUsername);
+                setMyApps(mine);
+              }
+            })
+            .catch(() => {});
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
     setCopiedSection(id);
+    toast.success("Copied to clipboard!");
     setTimeout(() => setCopiedSection(null), 2000);
   };
 
@@ -51,8 +78,10 @@ export default function DevelopersPage() {
       if (!res.ok) throw new Error(data.error || "Failed to register app");
 
       setCreatedApp(data.app);
+      toast.success("Application registered in the Nexus!");
     } catch (err: any) {
       setError(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -62,20 +91,47 @@ export default function DevelopersPage() {
     <div className="min-h-screen bg-[#06080e] text-zinc-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black">
       <CivixNavbar />
 
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 flex-1 w-full">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1 w-full space-y-10">
         {/* Header */}
-        <div className="max-w-3xl mb-12">
-          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3.5 py-1 text-xs font-semibold text-cyan-300 mb-4">
+        <div className="max-w-3xl space-y-3">
+          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3.5 py-1 text-xs font-semibold text-cyan-300">
             <Code2 className="h-4 w-4" />
             <span>Developer Protocol & Integration Suite</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
             Build on the Civix Nexus
           </h1>
-          <p className="mt-3 text-sm text-zinc-400 leading-relaxed">
+          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
             Register your application to access Civix Single Sign-On, synchronized player identity, banking-grade KYC verification, and cross-app referral attribution. 100% free with 0% platform fee.
           </p>
         </div>
+
+        {/* My Registered Apps Banner if any */}
+        {myApps.length > 0 && (
+          <div className="rounded-2xl border border-cyan-950/60 bg-[#0c121e]/80 p-5 space-y-3">
+            <h3 className="text-xs font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5" />
+              Your Registered Applications ({myApps.length})
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {myApps.map((a) => (
+                <div key={a.id} className="rounded-xl border border-zinc-800 bg-black/40 p-3 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-white text-xs">{a.name}</span>
+                    <span className="text-[10px] text-cyan-400 font-mono">Client ID: {a.clientId?.slice(0, 12)}...</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 line-clamp-1">{a.tagline}</p>
+                  <div className="pt-2 flex justify-between items-center text-[10px]">
+                    <span className="text-zinc-500">~{a.activeUsers} citizens</span>
+                    <Link href={`/app/${a.slug}`} className="text-cyan-400 hover:underline">
+                      Store Page →
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* LEFT: App Registration */}
@@ -235,6 +291,12 @@ export default function DevelopersPage() {
                   </span>
                   Add Civix Login Button (Client-Side)
                 </h3>
+                <button
+                  onClick={() => copyToClipboard(`<a href="https://civix-plum.vercel.app/api/oauth/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=https://yourapp.com/callback&scope=identity" class="btn-civix">⚡ Sign in with Civix ID</a>`, "step1")}
+                  className="text-xs text-zinc-400 hover:text-cyan-300 flex items-center gap-1"
+                >
+                  <Copy className="h-3 w-3" /> Copy
+                </button>
               </div>
               <p className="text-xs text-zinc-400 mb-3">
                 Place this link on your frontend. It initiates the standard OAuth 2.0 flow:
@@ -259,6 +321,12 @@ export default function DevelopersPage() {
                   </span>
                   Exchange Auth Code for Citizen Profile (Server-Side)
                 </h3>
+                <button
+                  onClick={() => copyToClipboard(`export async function GET(req) {\n  const code = req.nextUrl.searchParams.get("code");\n  const res = await fetch("https://civix-plum.vercel.app/api/oauth/token", {\n    method: "POST",\n    headers: { "Content-Type": "application/json" },\n    body: JSON.stringify({\n      code,\n      client_id: process.env.CIVIX_CLIENT_ID,\n      client_secret: process.env.CIVIX_CLIENT_SECRET\n    })\n  });\n  const { citizen } = await res.json();\n}`, "step2")}
+                  className="text-xs text-zinc-400 hover:text-cyan-300 flex items-center gap-1"
+                >
+                  <Copy className="h-3 w-3" /> Copy
+                </button>
               </div>
               <p className="text-xs text-zinc-400 mb-3">
                 Works in Next.js API Routes, Cloudflare Workers, Express, or Node.js:

@@ -135,8 +135,40 @@ export async function initDb(): Promise<void> {
       citizen_id TEXT NOT NULL REFERENCES civix_citizens(id),
       app_id TEXT NOT NULL REFERENCES civix_apps(id),
       scopes TEXT NOT NULL,
+      revoked INTEGER DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now')),
       UNIQUE(citizen_id, app_id)
+    );
+  `);
+
+  try {
+    await db.execute("ALTER TABLE civix_authorizations ADD COLUMN revoked INTEGER DEFAULT 0");
+  } catch {}
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS civix_app_screenshots (
+      id TEXT PRIMARY KEY,
+      app_id TEXT NOT NULL REFERENCES civix_apps(id),
+      url TEXT NOT NULL,
+      caption TEXT,
+      sort_order INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS civix_featured_banners (
+      id TEXT PRIMARY KEY,
+      app_id TEXT,
+      title TEXT NOT NULL,
+      subtitle TEXT,
+      badge_text TEXT,
+      banner_url TEXT NOT NULL,
+      cta_text TEXT DEFAULT 'Launch Application',
+      cta_url TEXT,
+      sort_order INTEGER DEFAULT 0,
+      active INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now'))
     );
   `);
 
@@ -279,6 +311,71 @@ export async function initDb(): Promise<void> {
           app.featured,
           app.verified,
           app.status,
+        ],
+      });
+    }
+  }
+
+  // Seed default featured banners if empty
+  const bannerCountRes = await db.execute("SELECT COUNT(*) as count FROM civix_featured_banners");
+  const bannerCount = Number(bannerCountRes.rows[0]?.count || 0);
+
+  if (bannerCount === 0) {
+    const banners = [
+      {
+        id: "banner_gug",
+        app_id: "app_gug",
+        title: "Grow UR Gold — The Sovereign Equity Bourse",
+        subtitle: "Audited 60% Corporate Dividends, Real-time Order Book, and 1-Click CIVIX Passport Login.",
+        badge_text: "FEATURED BOURSE",
+        banner_url: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1600&q=80",
+        cta_text: "Launch Exchange",
+        cta_url: "/api/oauth/launch/grow-ur-gold",
+        sort_order: 1,
+        active: 1,
+      },
+      {
+        id: "banner_labour",
+        app_id: "app_the-labour-exchange_a27c",
+        title: "The Labour Exchange & Sovereign Guilds",
+        subtitle: "Contract marketplace, worker syndicates, and wage clearing across the Realm.",
+        badge_text: "VERIFIED APP",
+        banner_url: "https://images.unsplash.com/photo-1541888946425-d0fbb186f5f7?auto=format&fit=crop&w=1600&q=80",
+        cta_text: "Launch Labour Exchange",
+        cta_url: "/api/oauth/launch/the-labour-exchange",
+        sort_order: 2,
+        active: 1,
+      },
+      {
+        id: "banner_bank",
+        app_id: "app_bank_europe",
+        title: "Bank of Europe — Sovereign Liquidity Rails",
+        subtitle: "Milanese vaults, institutional lending, term deposits, and fractional banking.",
+        badge_text: "UPCOMING INFRASTRUCTURE",
+        banner_url: "https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?auto=format&fit=crop&w=1600&q=80",
+        cta_text: "Explore Bank Details",
+        cta_url: "/app/bank-of-europe",
+        sort_order: 3,
+        active: 1,
+      },
+    ];
+
+    for (const b of banners) {
+      await db.execute({
+        sql: `INSERT INTO civix_featured_banners (
+          id, app_id, title, subtitle, badge_text, banner_url, cta_text, cta_url, sort_order, active
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        args: [
+          b.id,
+          b.app_id,
+          b.title,
+          b.subtitle,
+          b.badge_text,
+          b.banner_url,
+          b.cta_text,
+          b.cta_url,
+          b.sort_order,
+          b.active,
         ],
       });
     }

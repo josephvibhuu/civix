@@ -52,7 +52,7 @@ function LoginForm() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Login failed");
 
-      if (returnTo.startsWith("http")) {
+      if (returnTo.startsWith("http") || returnTo.startsWith("/api")) {
         window.location.href = returnTo;
       } else {
         router.push(returnTo);
@@ -86,7 +86,7 @@ function LoginForm() {
 
       setSuccess("Sovereign Passport created! Redirecting...");
       setTimeout(() => {
-        if (returnTo.startsWith("http")) {
+        if (returnTo.startsWith("http") || returnTo.startsWith("/api")) {
           window.location.href = returnTo;
         } else {
           router.push(returnTo);
