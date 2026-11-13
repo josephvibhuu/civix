@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
-import { Search, Compass, Users, Code2, Shield, ExternalLink, Zap, ArrowRight, LayoutGrid, Trophy } from "lucide-react";
+import { Search, Compass, Users, Code2, Shield, ExternalLink, Zap, ArrowRight, LayoutGrid, Trophy, Scroll, Award, Bell } from "lucide-react";
 import { AppItem } from "./AppCard";
 
 interface Props {
@@ -122,6 +122,42 @@ export default function CommandPalette({ apps = [], isOpen, onClose }: Props) {
               >
                 <Compass className="h-4 w-4 text-cyan-400" />
                 <span>Explore App Store</span>
+              </Command.Item>
+
+              <Command.Item
+                value="Imperial Gazette Edicts Decrees Laws Senate Proclamations"
+                onSelect={() => {
+                  onClose();
+                  router.push("/edicts");
+                }}
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-zinc-300 cursor-pointer hover:bg-white/5 hover:text-white transition-colors aria-selected:bg-white/5"
+              >
+                <Scroll className="h-4 w-4 text-amber-400" />
+                <span>Imperial Gazette & Decrees</span>
+              </Command.Item>
+
+              <Command.Item
+                value="KYC Verification Chamber Bank Verified Tier Notary Antiquity"
+                onSelect={() => {
+                  onClose();
+                  router.push("/verify");
+                }}
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-zinc-300 cursor-pointer hover:bg-white/5 hover:text-white transition-colors aria-selected:bg-white/5"
+              >
+                <Award className="h-4 w-4 text-emerald-400" />
+                <span>KYC Verification Chamber</span>
+              </Command.Item>
+
+              <Command.Item
+                value="Universal Inbox Notifications Alerts Dividends Escrow"
+                onSelect={() => {
+                  onClose();
+                  router.push("/inbox");
+                }}
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-zinc-300 cursor-pointer hover:bg-white/5 hover:text-white transition-colors aria-selected:bg-white/5"
+              >
+                <Bell className="h-4 w-4 text-sky-400" />
+                <span>Universal Notification Hub</span>
               </Command.Item>
 
               <Command.Item

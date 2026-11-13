@@ -133,6 +133,8 @@ export default function AppCard({ app }: { app: AppItem }) {
           {/* 1-Click Launch Button */}
           <a
             href={`/api/oauth/launch/${app.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-sky-500 py-2 px-3 text-xs font-bold text-black shadow-md shadow-cyan-500/20 hover:brightness-110 active:scale-95 transition-all group/btn"
           >
             <Zap className="h-3.5 w-3.5 fill-black stroke-black" />

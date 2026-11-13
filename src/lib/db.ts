@@ -211,6 +211,38 @@ export async function initDb(): Promise<void> {
     );
   `);
 
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS civix_verification_requests (
+      id TEXT PRIMARY KEY,
+      citizen_id TEXT NOT NULL REFERENCES civix_citizens(id),
+      target_tier TEXT NOT NULL,
+      challenge_code TEXT NOT NULL,
+      contract_memo TEXT,
+      proof_tx TEXT,
+      character_age_days INTEGER DEFAULT 35,
+      status TEXT DEFAULT 'pending',
+      notes TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      verified_at TEXT
+    );
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS civix_edicts (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      summary TEXT NOT NULL,
+      content TEXT NOT NULL,
+      category TEXT NOT NULL,
+      author_title TEXT NOT NULL,
+      target_tier TEXT DEFAULT 'all',
+      is_pinned INTEGER DEFAULT 0,
+      badge_text TEXT,
+      action_url TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+  `);
+
   // Seed default 5 ecosystem apps if not present
   const existingApps = await db.execute("SELECT COUNT(*) as count FROM civix_apps");
   const count = Number(existingApps.rows[0]?.count || 0);
@@ -460,5 +492,72 @@ export async function initDb(): Promise<void> {
     }
   } catch (err) {
     console.error("Reviews seeding notice:", err);
+  }
+
+  // Seed default imperial edicts if not present
+  try {
+    const edictCountRes = await db.execute("SELECT COUNT(*) as count FROM civix_edicts");
+    if (Number(edictCountRes.rows[0]?.count || 0) === 0) {
+      const defaultEdicts = [
+        {
+          id: "edict_001",
+          title: "Imperial Decree No. 42: Proclamation of Sovereign WebOS & Multi-Bourse Workspace",
+          summary: "By order of the Grand Chancellor, all sovereign bourses and guild enterprises are hereby unified within the CIVIX WebOS workspace deck.",
+          content: "Citizens of Parlamentum: Henceforth, all licensed economic institutions—including Grow UR Gold equity bourse, The Labour Exchange guild hall, and the Bank of Europe vaults—shall operate interconnected through cryptographic 1-Click Single Sign-On and multi-tab persistent execution. Context switching and fragmented authentication are hereby abolished.",
+          category: "edict",
+          author_title: "Imperial Senate & Grand Chancellor",
+          target_tier: "all",
+          is_pinned: 1,
+          badge_text: "Imperial Law",
+          action_url: "/workspace",
+        },
+        {
+          id: "edict_002",
+          title: "Grow UR Gold Treasury Notice: Q4 Dividend Distribution & Yield Rebalance",
+          summary: "Treasury announces record dividend distribution of 480,000 gold pieces across all active equity tier holders.",
+          content: "The Grow UR Gold board of governors has finalized the weekly dividend allocation. Registered Tier 2 and Tier 3 verified citizens will receive automatic ledger disbursements into their sovereign vaults. Yields on mining conglomerates and lumber cartels have been adjusted upwards by 3.4% following the territorial expansion.",
+          category: "market",
+          author_title: "Grow UR Gold Board of Governors",
+          target_tier: "all",
+          is_pinned: 0,
+          badge_text: "Bourse Treasury",
+          action_url: "/app/grow-ur-gold",
+        },
+        {
+          id: "edict_003",
+          title: "The Labour Exchange Guild Accord: Anti-Sybil Tier 2 Verification Activated",
+          summary: "Guild magistrate establishes mandatory character antiquity checks and notary memo bonds for uncollateralized contract escrow.",
+          content: "To combat fraudulent default rings and alt-account sybil attacks, high-value guild contracts exceeding 10,000 gold will require Tier 2 (Bank Verified) status. Citizens may verify their character tenure (>30 days active in Parlamentum) via the self-serve /verify chamber using zero-value notary memos.",
+          category: "release",
+          author_title: "High Guild Magistrate",
+          target_tier: "tier_1_citizen",
+          is_pinned: 0,
+          badge_text: "Security Accord",
+          action_url: "/verify",
+        },
+        {
+          id: "edict_004",
+          title: "Security Advisory: Universal 1-Click SSO & Session Token Isolation Protocols",
+          summary: "CIVIX security counsel issues protocol guidelines on cross-origin cookie policies and RFC 7009 token revocation.",
+          content: "All partner bourses have been upgraded with partitioned cryptographic tokens and SameSite security bridges. When launching partner applications, top-level sovereign navigation guarantees zero cookie dropping or expired session interruptions. Citizens are encouraged to maintain active 2FA backup codes.",
+          category: "security",
+          author_title: "CIVIX Cryptographic Security Council",
+          target_tier: "all",
+          is_pinned: 0,
+          badge_text: "Security Advisory",
+          action_url: "/dashboard",
+        },
+      ];
+
+      for (const e of defaultEdicts) {
+        await db.execute({
+          sql: `INSERT OR IGNORE INTO civix_edicts (id, title, summary, content, category, author_title, target_tier, is_pinned, badge_text, action_url)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          args: [e.id, e.title, e.summary, e.content, e.category, e.author_title, e.target_tier, e.is_pinned, e.badge_text, e.action_url],
+        });
+      }
+    }
+  } catch (err) {
+    console.error("Edicts seeding notice:", err);
   }
 }

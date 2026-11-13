@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { 
   Layers, Sparkles, LogIn, LogOut, Code2, Compass, Shield, 
-  Users, Bell, Search, ShieldAlert, ChevronDown, User, ExternalLink, LayoutGrid, Trophy 
+  Users, Bell, Search, ShieldAlert, ChevronDown, User, ExternalLink, LayoutGrid, Trophy, Scroll, Award 
 } from "lucide-react";
 import CommandPalette from "./CommandPalette";
 import { AppItem } from "./AppCard";
@@ -148,18 +148,11 @@ export default function CivixNavbar({ apps = [] }: { apps?: AppItem[] }) {
                 </span>
               </Link>
               <Link
-                href="/dashboard"
+                href="/edicts"
                 className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
               >
-                <Shield className="h-3.5 w-3.5 text-emerald-400" />
-                Dashboard
-              </Link>
-              <Link
-                href="/referrals"
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
-              >
-                <Users className="h-3.5 w-3.5 text-sky-400" />
-                Referrals
+                <Scroll className="h-3.5 w-3.5 text-amber-400" />
+                Edicts
               </Link>
               <Link
                 href="/leaderboard"
@@ -167,6 +160,20 @@ export default function CivixNavbar({ apps = [] }: { apps?: AppItem[] }) {
               >
                 <Trophy className="h-3.5 w-3.5 text-amber-400" />
                 Leaderboard
+              </Link>
+              <Link
+                href="/verify"
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <Award className="h-3.5 w-3.5 text-emerald-400" />
+                Verify
+              </Link>
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <Shield className="h-3.5 w-3.5 text-cyan-400" />
+                Passport
               </Link>
               <Link
                 href="/developers"
@@ -287,6 +294,17 @@ export default function CivixNavbar({ apps = [] }: { apps?: AppItem[] }) {
                           ))}
                         </div>
                       )}
+
+                      <div className="pt-2 mt-2 border-t border-zinc-800 text-center">
+                        <Link
+                          href="/inbox"
+                          onClick={() => setShowNotifs(false)}
+                          className="text-[11px] font-bold text-cyan-400 hover:text-cyan-300 transition-colors flex items-center justify-center gap-1"
+                        >
+                          <span>Open Universal Notification Hub</span>
+                          <ExternalLink className="h-3 w-3" />
+                        </Link>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -306,8 +324,8 @@ export default function CivixNavbar({ apps = [] }: { apps?: AppItem[] }) {
                         {citizen.currentUsername}
                       </span>
                       <span className="text-[10px] text-cyan-400 font-mono leading-none">
-                        {citizen.verificationTier === "tier_3_sovereign"
-                          ? "Sovereign"
+                        {citizen.verificationTier === "tier_3_sovereign_elite" || citizen.verificationTier === "tier_3_sovereign"
+                          ? "Sovereign Elite"
                           : citizen.verificationTier === "tier_2_bank_verified"
                           ? "Bank Verified"
                           : "Citizen"}
@@ -328,12 +346,39 @@ export default function CivixNavbar({ apps = [] }: { apps?: AppItem[] }) {
                       </div>
 
                       <Link
+                        href="/workspace"
+                        onClick={() => setShowUserMenu(false)}
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-cyan-300 hover:bg-cyan-500/10 transition-colors"
+                      >
+                        <LayoutGrid className="h-3.5 w-3.5 text-cyan-400" />
+                        <span>WebOS Workspace</span>
+                      </Link>
+
+                      <Link
+                        href="/verify"
+                        onClick={() => setShowUserMenu(false)}
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-emerald-300 hover:bg-emerald-500/10 transition-colors"
+                      >
+                        <Award className="h-3.5 w-3.5 text-emerald-400" />
+                        <span>KYC Chamber</span>
+                      </Link>
+
+                      <Link
                         href="/dashboard"
                         onClick={() => setShowUserMenu(false)}
                         className="flex items-center gap-2 rounded-xl px-3 py-2 text-zinc-200 hover:bg-cyan-500/10 hover:text-cyan-300 transition-colors"
                       >
                         <User className="h-3.5 w-3.5 text-cyan-400" />
                         <span>Citizen Dashboard</span>
+                      </Link>
+
+                      <Link
+                        href="/inbox"
+                        onClick={() => setShowUserMenu(false)}
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-zinc-200 hover:bg-cyan-500/10 hover:text-cyan-300 transition-colors"
+                      >
+                        <Bell className="h-3.5 w-3.5 text-sky-400" />
+                        <span>Universal Inbox</span>
                       </Link>
 
                       <Link

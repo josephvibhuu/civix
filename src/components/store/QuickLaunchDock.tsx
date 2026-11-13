@@ -79,6 +79,8 @@ export default function QuickLaunchDock() {
             <a
               key={app.id}
               href={`/api/oauth/launch/${app.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="group relative flex flex-col items-center justify-center p-3 rounded-xl border border-zinc-800 bg-[#070b14]/80 hover:border-cyan-400 hover:bg-[#0b1325] hover:shadow-lg hover:shadow-cyan-500/10 transition-all duration-200 text-center"
               title={`1-Click Launch ${app.name}`}
             >

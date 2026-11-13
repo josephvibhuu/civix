@@ -6,7 +6,7 @@ import {
   Layers, Compass, Shield, Users, Code2, Plus, X, Maximize2, Minimize2, 
   RefreshCw, ExternalLink, Columns2, Square, ChevronLeft, ChevronRight, 
   Search, Zap, TrendingUp, Swords, Dices, Landmark, ShieldCheck, 
-  AlertCircle, Lock, Sparkles, Check, ArrowUpRight, Laptop, LogIn
+  AlertCircle, Lock, Sparkles, Check, ArrowUpRight, Laptop, LogIn, Scroll, Trophy, Award, Bell
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppItem } from "../AppCard";
@@ -63,7 +63,11 @@ export default function SovereignWorkspace() {
   const [isAppPickerOpen, setIsAppPickerOpen] = useState(false);
   const [pickerSearch, setPickerSearch] = useState("");
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [pinnedSlugs, setPinnedSlugs] = useState<string[]>(["grow-ur-gold", "labour-exchange"]);
+  const [pinnedSlugs, setPinnedSlugs] = useState<string[]>(["grow-ur-gold", "the-labour-exchange"]);
+  const [forceIframeTabs, setForceIframeTabs] = useState<Record<string, boolean>>({});
+
+  // Apps requiring top-level window launch to prevent cross-origin third-party iframe SameSite=Lax cookie drops
+  const APPS_REQUIRING_TOP_LEVEL = useMemo(() => new Set(["the-labour-exchange"]), []);
 
   // Fetch initial citizen & apps
   useEffect(() => {
@@ -436,13 +440,57 @@ export default function SovereignWorkspace() {
           </Link>
 
           <Link
+            href="/edicts"
+            className={`w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs text-zinc-400 hover:bg-white/5 hover:text-white transition-colors ${
+              dockCollapsed ? "justify-center" : ""
+            }`}
+            title="Imperial Gazette & Decrees"
+          >
+            <Scroll className="h-4 w-4 text-amber-400 shrink-0" />
+            {!dockCollapsed && <span>Imperial Edicts</span>}
+          </Link>
+
+          <Link
+            href="/leaderboard"
+            className={`w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs text-zinc-400 hover:bg-white/5 hover:text-white transition-colors ${
+              dockCollapsed ? "justify-center" : ""
+            }`}
+            title="Realm Leaderboard"
+          >
+            <Trophy className="h-4 w-4 text-amber-400 shrink-0" />
+            {!dockCollapsed && <span>Leaderboard</span>}
+          </Link>
+
+          <Link
+            href="/verify"
+            className={`w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs text-zinc-400 hover:bg-white/5 hover:text-white transition-colors ${
+              dockCollapsed ? "justify-center" : ""
+            }`}
+            title="KYC Verification Chamber"
+          >
+            <Award className="h-4 w-4 text-emerald-400 shrink-0" />
+            {!dockCollapsed && <span>KYC Chamber</span>}
+          </Link>
+
+          <Link
+            href="/inbox"
+            className={`w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs text-zinc-400 hover:bg-white/5 hover:text-white transition-colors ${
+              dockCollapsed ? "justify-center" : ""
+            }`}
+            title="Universal Notification Hub"
+          >
+            <Bell className="h-4 w-4 text-sky-400 shrink-0" />
+            {!dockCollapsed && <span>Universal Inbox</span>}
+          </Link>
+
+          <Link
             href="/dashboard"
             className={`w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs text-zinc-400 hover:bg-white/5 hover:text-white transition-colors ${
               dockCollapsed ? "justify-center" : ""
             }`}
             title="Citizen Passport"
           >
-            <Shield className="h-4 w-4 text-emerald-400 shrink-0" />
+            <Shield className="h-4 w-4 text-cyan-400 shrink-0" />
             {!dockCollapsed && <span>Citizen Passport</span>}
           </Link>
         </div>
@@ -670,31 +718,91 @@ export default function SovereignWorkspace() {
                 {/* Render all opened tabs persistent in DOM to maintain state */}
                 {tabs.map((tab) => {
                   const isVisible = tab.id === activeTabId;
+                  const isTopLevelRequired = APPS_REQUIRING_TOP_LEVEL.has(tab.slug) && !forceIframeTabs[tab.id];
+
                   return (
                     <div
                       key={tab.id}
                       className={`w-full h-full relative ${isVisible ? "block" : "hidden"}`}
                     >
-                      {/* Sandboxed iframe */}
-                      <iframe
-                        id={`iframe-${tab.id}`}
-                        src={tab.launchUrl}
-                        title={tab.name}
-                        allow="clipboard-write; clipboard-read; camera; microphone; geolocation"
-                        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
-                        className="w-full h-full border-0 bg-[#07090e]"
-                      />
+                      {isTopLevelRequired ? (
+                        /* SOVEREIGN CONNECTED PORTAL (Zero Cookie Drop) */
+                        <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-[#080d1a] to-[#04060b]">
+                          <div className="max-w-md w-full space-y-6 animate-in fade-in duration-200">
+                            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-950 via-sky-950 to-indigo-950 border border-cyan-500/40 shadow-xl shadow-cyan-950/60">
+                              <Landmark className="h-8 w-8 text-cyan-300" />
+                            </div>
 
-                      {/* Fallback bar if app cannot be embedded due to external X-Frame restrictions */}
-                      <div className="absolute bottom-2 right-2 flex items-center gap-2 rounded-xl bg-black/80 backdrop-blur-md border border-zinc-800 px-3 py-1.5 text-[11px] text-zinc-400 shadow-xl opacity-40 hover:opacity-100 transition-opacity">
-                        <span>External security blocking frame?</span>
-                        <button
-                          onClick={() => openInNewWindow(tab.launchUrl)}
-                          className="font-bold text-cyan-400 hover:underline flex items-center gap-1"
-                        >
-                          Pop-Out <ExternalLink className="h-3 w-3" />
-                        </button>
-                      </div>
+                            <div>
+                              <div className="inline-flex items-center gap-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 px-3 py-0.5 text-[10px] font-bold text-cyan-300 uppercase tracking-wider mb-2">
+                                <ShieldCheck className="h-3.5 w-3.5 text-cyan-400" />
+                                Sovereign Protected Session
+                              </div>
+                              <h2 className="text-xl font-bold text-white">{tab.name}</h2>
+                              <p className="text-xs text-zinc-400 mt-1 max-w-sm mx-auto">{tab.tagline}</p>
+                            </div>
+
+                            <div className="rounded-xl border border-zinc-800 bg-[#090f1d] p-3.5 text-left space-y-1.5">
+                              <div className="flex items-center gap-2 text-xs font-semibold text-zinc-200">
+                                <Zap className="h-3.5 w-3.5 text-cyan-400" />
+                                <span>1-Click Sovereign SSO Auto-Login</span>
+                              </div>
+                              <p className="text-[11px] text-zinc-400 leading-relaxed">
+                                To prevent browser third-party cookie isolation and guarantee contract escrow integrity, this bourse connects via the high-speed top-level sovereign bridge.
+                              </p>
+                            </div>
+
+                            <div className="space-y-2 pt-2">
+                              <button
+                                onClick={() => openInNewWindow(tab.launchUrl)}
+                                className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-400 to-sky-500 py-3 px-4 text-xs font-extrabold text-black shadow-lg shadow-cyan-500/25 hover:brightness-110 active:scale-95 transition-all"
+                              >
+                                <Zap className="h-4 w-4 fill-black stroke-black" />
+                                <span>Launch {tab.name} (1-Click SSO)</span>
+                                <ExternalLink className="h-3.5 w-3.5" />
+                              </button>
+
+                              <button
+                                onClick={() => setForceIframeTabs((prev) => ({ ...prev, [tab.id]: true }))}
+                                className="w-full text-center text-[11px] text-zinc-500 hover:text-zinc-300 py-1 transition-colors"
+                              >
+                                Attempt In-Frame View (Experimental)
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        /* Sandboxed iframe */
+                        <>
+                          <iframe
+                            id={`iframe-${tab.id}`}
+                            src={tab.launchUrl}
+                            title={tab.name}
+                            allow="clipboard-write; clipboard-read; camera; microphone; geolocation"
+                            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
+                            className="w-full h-full border-0 bg-[#07090e]"
+                          />
+
+                          {/* Fallback bar if app cannot be embedded due to external X-Frame restrictions */}
+                          <div className="absolute bottom-2 right-2 flex items-center gap-2 rounded-xl bg-black/80 backdrop-blur-md border border-zinc-800 px-3 py-1.5 text-[11px] text-zinc-400 shadow-xl opacity-40 hover:opacity-100 transition-opacity">
+                            <span>External security blocking frame?</span>
+                            <button
+                              onClick={() => openInNewWindow(tab.launchUrl)}
+                              className="font-bold text-cyan-400 hover:underline flex items-center gap-1"
+                            >
+                              Pop-Out <ExternalLink className="h-3 w-3" />
+                            </button>
+                            {APPS_REQUIRING_TOP_LEVEL.has(tab.slug) && (
+                              <button
+                                onClick={() => setForceIframeTabs((prev) => ({ ...prev, [tab.id]: false }))}
+                                className="text-zinc-400 hover:text-white underline ml-1"
+                              >
+                                Return to Portal
+                              </button>
+                            )}
+                          </div>
+                        </>
+                      )}
                     </div>
                   );
                 })}
@@ -737,14 +845,37 @@ export default function SovereignWorkspace() {
                   {/* Secondary Viewport Frame */}
                   <div className="flex-1 relative w-full h-full overflow-hidden">
                     {secondaryTab ? (
-                      <iframe
-                        id={`iframe-sec-${secondaryTab.id}`}
-                        src={secondaryTab.launchUrl}
-                        title={secondaryTab.name}
-                        allow="clipboard-write; clipboard-read; camera; microphone; geolocation"
-                        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
-                        className="w-full h-full border-0 bg-[#07090e]"
-                      />
+                      APPS_REQUIRING_TOP_LEVEL.has(secondaryTab.slug) && !forceIframeTabs[secondaryTab.id] ? (
+                        <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-[#080d1a] to-[#04060b]">
+                          <div className="max-w-xs space-y-4">
+                            <h3 className="text-sm font-bold text-white">{secondaryTab.name}</h3>
+                            <p className="text-[11px] text-zinc-400">{secondaryTab.tagline}</p>
+                            <button
+                              onClick={() => openInNewWindow(secondaryTab.launchUrl)}
+                              className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-cyan-400 py-2.5 px-3 text-xs font-bold text-black shadow-md hover:brightness-110 transition-all"
+                            >
+                              <Zap className="h-3.5 w-3.5 fill-black stroke-black" />
+                              <span>Open in Sovereign Tab</span>
+                              <ExternalLink className="h-3 w-3" />
+                            </button>
+                            <button
+                              onClick={() => setForceIframeTabs((prev) => ({ ...prev, [secondaryTab.id]: true }))}
+                              className="text-[10px] text-zinc-500 hover:text-zinc-300 underline"
+                            >
+                              Attempt In-Frame View
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <iframe
+                          id={`iframe-sec-${secondaryTab.id}`}
+                          src={secondaryTab.launchUrl}
+                          title={secondaryTab.name}
+                          allow="clipboard-write; clipboard-read; camera; microphone; geolocation"
+                          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
+                          className="w-full h-full border-0 bg-[#07090e]"
+                        />
+                      )
                     ) : (
                       <div className="h-full w-full flex flex-col items-center justify-center p-4 text-center text-zinc-500 text-xs">
                         <span>Select an app to dock in this pane</span>

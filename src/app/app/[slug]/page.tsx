@@ -167,6 +167,8 @@ function AppDetailContent() {
             <div className="flex flex-col sm:flex-row md:flex-col items-stretch md:items-end gap-3 shrink-0">
               <a
                 href={`/api/oauth/launch/${app.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-400 via-sky-400 to-indigo-500 px-7 py-3.5 text-sm font-extrabold text-black shadow-xl shadow-cyan-500/25 hover:brightness-110 active:scale-95 transition-all"
               >
                 <Zap className="h-4 w-4 fill-black stroke-black" />

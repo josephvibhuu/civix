@@ -265,6 +265,19 @@ function LoginForm() {
       {/* TAB 1: LOGIN */}
       {tab === "login" && (
         <div className="space-y-4">
+          {/* SSO Context Banner if redirected from an app */}
+          {returnTo && returnTo !== "/" && (
+            <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/30 p-3 text-xs text-cyan-300 flex items-start gap-2.5">
+              <Zap className="h-4 w-4 shrink-0 text-cyan-400 mt-0.5" />
+              <div>
+                <span className="font-bold block text-white">Single Sign-On Authentication</span>
+                <span className="text-[11px] text-zinc-300">
+                  Authenticate your Sovereign Passport below to seamlessly proceed to your application.
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Quick Auto-Fill & 1-Click Login Card */}
           <div className="rounded-2xl border border-cyan-500/40 bg-gradient-to-r from-cyan-950/40 via-[#0d1629] to-[#0a101f] p-3.5 space-y-2.5 shadow-lg shadow-cyan-950/40">
             <div className="flex items-center justify-between">
@@ -282,19 +295,19 @@ function LoginForm() {
             <div className="flex items-center gap-2 pt-1">
               <button
                 type="button"
-                onClick={() => handleQuickLogin("CardinalSanjay")}
+                onClick={() => handleQuickLogin(loginId || "CardinalSanjay")}
                 className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-sky-500 py-2 text-xs font-bold text-black shadow-md shadow-cyan-500/20 hover:from-cyan-400 hover:to-sky-400 transition-all active:scale-95"
               >
                 <Zap className="h-3.5 w-3.5 fill-black stroke-black" />
-                <span>Log in as CardinalSanjay</span>
+                <span>Log in as {loginId || "CardinalSanjay"}</span>
               </button>
               <button
                 type="button"
-                onClick={() => handleQuickLogin("Birtita")}
+                onClick={() => handleQuickLogin(loginId === "Birtita" ? "CardinalSanjay" : "Birtita")}
                 className="rounded-xl border border-zinc-700 bg-zinc-900/90 px-3 py-2 text-xs font-semibold text-zinc-200 hover:border-cyan-500/50 hover:text-white transition-all"
-                title="Log in as Birtita"
+                title={`Switch to ${loginId === "Birtita" ? "CardinalSanjay" : "Birtita"}`}
               >
-                Birtita
+                {loginId === "Birtita" ? "CardinalSanjay" : "Birtita"}
               </button>
             </div>
           </div>
