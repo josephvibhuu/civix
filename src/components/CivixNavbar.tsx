@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { 
   Layers, Sparkles, LogIn, LogOut, Code2, Compass, Shield, 
-  Users, Bell, Search, ShieldAlert, ChevronDown, User, ExternalLink, Smartphone 
+  Users, Bell, Search, ShieldAlert, ChevronDown, User, ExternalLink, LayoutGrid 
 } from "lucide-react";
 import CommandPalette from "./CommandPalette";
 import { AppItem } from "./AppCard";
@@ -138,11 +138,14 @@ export default function CivixNavbar({ apps = [] }: { apps?: AppItem[] }) {
                 Store
               </Link>
               <Link
-                href="/device"
+                href="/workspace"
                 className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-cyan-300 hover:text-white hover:bg-cyan-500/10 transition-colors"
               >
-                <Smartphone className="h-3.5 w-3.5 text-cyan-400" />
-                Pocket Device
+                <LayoutGrid className="h-3.5 w-3.5 text-cyan-400" />
+                <span>Workspace</span>
+                <span className="rounded-full bg-cyan-400/20 px-1.5 py-0.2 text-[8px] font-black text-cyan-300 border border-cyan-400/40 tracking-wider">
+                  WebOS
+                </span>
               </Link>
               <Link
                 href="/dashboard"
@@ -371,6 +374,44 @@ export default function CivixNavbar({ apps = [] }: { apps?: AppItem[] }) {
           </div>
         </div>
       </header>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <div className="fixed bottom-0 inset-x-0 z-40 border-t border-cyan-950/60 bg-[#070a12]/95 backdrop-blur-xl md:hidden px-3 py-2 flex items-center justify-around">
+        <Link
+          href="/"
+          className="flex flex-col items-center gap-1 text-[10px] font-semibold text-zinc-400 hover:text-white"
+        >
+          <Compass className="h-4 w-4 text-cyan-400" />
+          <span>Store</span>
+        </Link>
+
+        <Link
+          href="/workspace"
+          className="flex flex-col items-center gap-1 text-[10px] font-semibold text-cyan-300"
+        >
+          <div className="relative">
+            <LayoutGrid className="h-4 w-4 text-cyan-400" />
+            <span className="absolute -top-1 -right-1 h-1.5 w-1.5 rounded-full bg-cyan-400" />
+          </div>
+          <span>Workspace</span>
+        </Link>
+
+        <button
+          onClick={() => setPaletteOpen(true)}
+          className="flex flex-col items-center gap-1 text-[10px] font-semibold text-zinc-400 hover:text-white"
+        >
+          <Search className="h-4 w-4 text-zinc-400" />
+          <span>Search</span>
+        </button>
+
+        <Link
+          href="/dashboard"
+          className="flex flex-col items-center gap-1 text-[10px] font-semibold text-zinc-400 hover:text-white"
+        >
+          <Shield className="h-4 w-4 text-emerald-400" />
+          <span>Passport</span>
+        </Link>
+      </div>
 
       {/* Cmd+K Palette */}
       <CommandPalette

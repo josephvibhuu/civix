@@ -7,7 +7,7 @@ import FeaturedBanner from "@/components/store/FeaturedBanner";
 import QuickLaunchDock from "@/components/store/QuickLaunchDock";
 import { 
   Search, Sparkles, Layers, ShieldCheck, Users, ArrowRight, 
-  CheckCircle2, Lock, TrendingUp, Swords, Dices, Landmark, Zap, Smartphone
+  CheckCircle2, Lock, TrendingUp, Swords, Dices, Landmark, Zap, LayoutGrid
 } from "lucide-react";
 import Link from "next/link";
 
@@ -57,33 +57,33 @@ export default function HomePage() {
           <FeaturedBanner />
         </section>
 
-        {/* Pocket Device Teaser Strip */}
+        {/* Sovereign WebOS Workspace Teaser Strip */}
         <section>
           <Link
-            href="/device"
+            href="/workspace"
             className="group flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl border border-cyan-500/40 bg-gradient-to-r from-cyan-950/40 via-[#0a1224] to-[#070d1a] p-4 px-6 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-500/15 transition-all"
           >
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-sky-500 text-black shadow-md shadow-cyan-500/30 group-hover:scale-105 transition-transform">
-                <Smartphone className="h-5 w-5 stroke-[2.5]" />
+                <LayoutGrid className="h-5 w-5 stroke-[2.5]" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-extrabold text-sm text-white group-hover:text-cyan-300 transition-colors">
-                    The CIVIX Pocket Device
+                    Sovereign WebOS Workspace
                   </span>
                   <span className="rounded-full bg-cyan-400/20 border border-cyan-400/50 px-2 py-0.2 text-[9px] font-black text-cyan-300 uppercase tracking-widest">
-                    NEW FEATURE
+                    NEW WEB PLATFORM
                   </span>
                 </div>
                 <p className="text-xs text-zinc-400">
-                  Phone & expand-mode shell with live edicts, 1-click sandbox, and notification dock.
+                  Multitask across Parlamentum apps with persistent tabs, dual-view split screen, and automatic 1-Click SSO.
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-1.5 text-xs font-bold text-cyan-400 group-hover:text-cyan-300 shrink-0">
-              <span>Open Pocket Device</span>
+              <span>Launch WebOS Workspace</span>
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </div>
           </Link>
