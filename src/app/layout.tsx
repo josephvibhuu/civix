@@ -14,8 +14,39 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CIVIX NEXUS — Sovereign App Store & Universal Identity",
-  description: "The universal application marketplace, Single Sign-On nexus, and sovereign passport for the Parlamentum realm.",
+  metadataBase: new URL("https://civix-plum.vercel.app"),
+  title: {
+    default: "CIVIX NEXUS — Sovereign WebOS & Universal Identity",
+    template: "%s | CIVIX NEXUS",
+  },
+  description: "The universal application marketplace, Sovereign WebOS workspace, Single Sign-On nexus, and cryptographic citizen passport for the Parlamentum realm.",
+  keywords: [
+    "CIVIX",
+    "Parlamentum",
+    "Sovereign WebOS",
+    "OAuth 2.0",
+    "Single Sign-On",
+    "Grow UR Gold",
+    "The Labour Exchange",
+    "Bank of Europe",
+    "KYC Verification",
+    "Citizen Passport",
+  ],
+  authors: [{ name: "CIVIX Cryptographic Council" }],
+  creator: "CIVIX Foundation",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://civix-plum.vercel.app",
+    siteName: "CIVIX NEXUS",
+    title: "CIVIX NEXUS — Sovereign WebOS & Universal Identity",
+    description: "Run, multitask, and split-screen all Parlamentum bourses, order books, and guild hubs with persistent state and 1-click single sign-on.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CIVIX NEXUS — Sovereign WebOS & Universal Identity",
+    description: "The universal application marketplace and WebOS command deck for Parlamentum citizens.",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

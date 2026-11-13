@@ -176,7 +176,9 @@ export default function LeaderboardPage() {
                       <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-800 border border-zinc-600 text-zinc-300 font-black text-lg">
                         🥈 2
                       </div>
-                      <span className="font-bold text-sm text-white">{filteredRecruiters[1].username}</span>
+                      <Link href={`/citizen/${encodeURIComponent(filteredRecruiters[1].username)}`} className="font-bold text-sm text-white hover:text-cyan-300 transition-colors">
+                        {filteredRecruiters[1].username}
+                      </Link>
                       <span className="text-[10px] font-mono text-zinc-500">{filteredRecruiters[1].gameProfileId}</span>
                       <div className="mt-2 rounded-full bg-zinc-800 px-3 py-1 text-xs font-mono font-bold text-zinc-300">
                         {filteredRecruiters[1].referralCount} Recruits
@@ -188,7 +190,9 @@ export default function LeaderboardPage() {
                       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-600 text-black font-black text-xl shadow-md shadow-amber-500/30">
                         👑 1
                       </div>
-                      <span className="font-black text-base text-amber-300">{filteredRecruiters[0].username}</span>
+                      <Link href={`/citizen/${encodeURIComponent(filteredRecruiters[0].username)}`} className="font-black text-base text-amber-300 hover:text-amber-200 transition-colors">
+                        {filteredRecruiters[0].username}
+                      </Link>
                       <span className="text-[10px] font-mono text-zinc-400">{filteredRecruiters[0].gameProfileId}</span>
                       <div className="mt-2 rounded-full bg-amber-400/20 border border-amber-400/40 px-3.5 py-1 text-xs font-mono font-black text-amber-300">
                         {filteredRecruiters[0].referralCount} Recruits
@@ -200,7 +204,9 @@ export default function LeaderboardPage() {
                       <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-950/60 border border-amber-800 text-amber-400 font-black text-lg">
                         🥉 3
                       </div>
-                      <span className="font-bold text-sm text-white">{filteredRecruiters[2].username}</span>
+                      <Link href={`/citizen/${encodeURIComponent(filteredRecruiters[2].username)}`} className="font-bold text-sm text-white hover:text-cyan-300 transition-colors">
+                        {filteredRecruiters[2].username}
+                      </Link>
                       <span className="text-[10px] font-mono text-zinc-500">{filteredRecruiters[2].gameProfileId}</span>
                       <div className="mt-2 rounded-full bg-amber-950/60 px-3 py-1 text-xs font-mono font-bold text-amber-400">
                         {filteredRecruiters[2].referralCount} Recruits
@@ -233,7 +239,9 @@ export default function LeaderboardPage() {
                             {rec.username[0]?.toUpperCase()}
                           </div>
                           <div className="truncate">
-                            <span className="font-semibold text-zinc-100 block truncate">{rec.username}</span>
+                            <Link href={`/citizen/${encodeURIComponent(rec.username)}`} className="font-semibold text-zinc-100 hover:text-cyan-300 block truncate transition-colors">
+                              {rec.username}
+                            </Link>
                             <span className="text-[10px] text-zinc-500 font-mono block truncate">{rec.gameProfileId}</span>
                           </div>
                         </div>
@@ -279,7 +287,9 @@ export default function LeaderboardPage() {
                           {cit.username[0]?.toUpperCase()}
                         </div>
                         <div className="truncate">
-                          <span className="font-semibold text-zinc-100 block truncate">{cit.username}</span>
+                          <Link href={`/citizen/${encodeURIComponent(cit.username)}`} className="font-semibold text-zinc-100 hover:text-cyan-300 block truncate transition-colors">
+                            {cit.username}
+                          </Link>
                           <span className="text-[10px] text-zinc-500 font-mono block truncate">{cit.gameProfileId}</span>
                         </div>
                       </div>

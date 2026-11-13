@@ -387,6 +387,40 @@ export async function GET(req) {
 }`}
               </pre>
             </div>
+
+            {/* Step 4: RFC 7009 Token Revocation */}
+            <div className="rounded-2xl border border-zinc-800 bg-[#0c121e]/70 p-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-400 text-[10px] font-black text-black">
+                    4
+                  </span>
+                  Session Revocation & Logout (<code className="text-indigo-300">RFC 7009</code>)
+                </h3>
+                <button
+                  onClick={() => copyToClipboard(`await fetch("https://civix-plum.vercel.app/api/oauth/revoke", {\n  method: "POST",\n  headers: { "Content-Type": "application/json" },\n  body: JSON.stringify({\n    token: authCodeOrSessionToken,\n    client_id: process.env.CIVIX_CLIENT_ID,\n    citizen_id: citizen.id\n  })\n});`, "step4")}
+                  className="text-xs text-zinc-400 hover:text-cyan-300 flex items-center gap-1"
+                >
+                  <Copy className="h-3 w-3" /> Copy
+                </button>
+              </div>
+              <p className="text-xs text-zinc-400 mb-3">
+                Cleanly invalidate citizen authorizations when they log out from your application:
+              </p>
+              <pre className="overflow-x-auto rounded-xl bg-black p-4 text-xs font-mono text-indigo-300 border border-zinc-800/80">
+{`// POST /api/oauth/revoke
+await fetch("https://civix-plum.vercel.app/api/oauth/revoke", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    token: authCodeOrSessionToken,
+    client_id: process.env.CIVIX_CLIENT_ID,
+    citizen_id: citizen.id
+  })
+});
+// Response: { "revoked": true }`}
+              </pre>
+            </div>
           </div>
         </div>
       </main>

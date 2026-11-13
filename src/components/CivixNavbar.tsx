@@ -428,10 +428,10 @@ export default function CivixNavbar({ apps = [] }: { apps?: AppItem[] }) {
       </header>
 
       {/* Mobile Bottom Navigation Bar */}
-      <div className="fixed bottom-0 inset-x-0 z-40 border-t border-cyan-950/60 bg-[#070a12]/95 backdrop-blur-xl md:hidden px-3 py-2 flex items-center justify-around">
+      <div className="fixed bottom-0 inset-x-0 z-40 border-t border-cyan-950/60 bg-[#070a12]/95 backdrop-blur-xl md:hidden px-2 py-2 flex items-center justify-around">
         <Link
           href="/"
-          className="flex flex-col items-center gap-1 text-[10px] font-semibold text-zinc-400 hover:text-white"
+          className="flex flex-col items-center gap-1 text-[10px] font-semibold text-zinc-400 hover:text-white transition-colors"
         >
           <Compass className="h-4 w-4 text-cyan-400" />
           <span>Store</span>
@@ -439,26 +439,34 @@ export default function CivixNavbar({ apps = [] }: { apps?: AppItem[] }) {
 
         <Link
           href="/workspace"
-          className="flex flex-col items-center gap-1 text-[10px] font-semibold text-cyan-300"
+          className="flex flex-col items-center gap-1 text-[10px] font-semibold text-cyan-300 transition-colors"
         >
           <div className="relative">
             <LayoutGrid className="h-4 w-4 text-cyan-400" />
             <span className="absolute -top-1 -right-1 h-1.5 w-1.5 rounded-full bg-cyan-400" />
           </div>
-          <span>Workspace</span>
+          <span>WebOS</span>
         </Link>
 
-        <button
-          onClick={() => setPaletteOpen(true)}
-          className="flex flex-col items-center gap-1 text-[10px] font-semibold text-zinc-400 hover:text-white"
+        <Link
+          href="/edicts"
+          className="flex flex-col items-center gap-1 text-[10px] font-semibold text-zinc-400 hover:text-white transition-colors"
         >
-          <Search className="h-4 w-4 text-zinc-400" />
-          <span>Search</span>
-        </button>
+          <Scroll className="h-4 w-4 text-amber-400" />
+          <span>Edicts</span>
+        </Link>
+
+        <Link
+          href="/leaderboard"
+          className="flex flex-col items-center gap-1 text-[10px] font-semibold text-zinc-400 hover:text-white transition-colors"
+        >
+          <Trophy className="h-4 w-4 text-amber-400" />
+          <span>Rankings</span>
+        </Link>
 
         <Link
           href="/dashboard"
-          className="flex flex-col items-center gap-1 text-[10px] font-semibold text-zinc-400 hover:text-white"
+          className="flex flex-col items-center gap-1 text-[10px] font-semibold text-zinc-400 hover:text-white transition-colors"
         >
           <Shield className="h-4 w-4 text-emerald-400" />
           <span>Passport</span>

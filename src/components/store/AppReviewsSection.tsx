@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Star, ShieldCheck, MessageSquare, ThumbsUp, Plus, X, Sparkles, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -210,9 +211,9 @@ export default function AppReviewsSection({ slug, appName }: { slug: string; app
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-xs text-white">
+                      <Link href={`/citizen/${encodeURIComponent(r.citizen.username)}`} className="font-semibold text-xs text-white hover:text-cyan-300 transition-colors">
                         {r.citizen.username}
-                      </span>
+                      </Link>
                       {r.isVerified && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.2 text-[9px] font-semibold text-emerald-400">
                           <CheckCircle2 className="h-3 w-3" /> Verified Citizen
