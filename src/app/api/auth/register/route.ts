@@ -133,11 +133,12 @@ export async function POST(req: Request) {
       },
     });
 
+    const isProd = process.env.NODE_ENV === "production";
     response.cookies.set("civix_session", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+      maxAge: 60 * 60 * 24 * 60, // 60 days
       path: "/",
     });
 

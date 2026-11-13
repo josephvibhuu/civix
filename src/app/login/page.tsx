@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Layers, KeyRound, Sparkles, UserPlus, RefreshCw, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react";
+import { Layers, KeyRound, Sparkles, UserPlus, RefreshCw, AlertCircle, CheckCircle2, ArrowRight, Zap } from "lucide-react";
 
 function LoginForm() {
   const router = useRouter();
@@ -35,6 +35,46 @@ function LoginForm() {
   const [recCode, setRecCode] = useState("");
   const [recNewPassword, setRecNewPassword] = useState("");
 
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("civix_last_user");
+      if (saved && !loginId) {
+        setLoginId(saved);
+      }
+    } catch {}
+  }, []);
+
+  const handleQuickLogin = async (username: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/auth/quick-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Quick login failed");
+
+      try {
+        localStorage.setItem("civix_last_user", username);
+      } catch {}
+
+      setSuccess(`Authenticated as ${username}! Resuming...`);
+      setTimeout(() => {
+        if (returnTo.startsWith("http") || returnTo.startsWith("/api")) {
+          window.location.href = returnTo;
+        } else {
+          router.push(returnTo);
+        }
+      }, 400);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -51,6 +91,10 @@ function LoginForm() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Login failed");
+
+      try {
+        localStorage.setItem("civix_last_user", loginId.trim());
+      } catch {}
 
       if (returnTo.startsWith("http") || returnTo.startsWith("/api")) {
         window.location.href = returnTo;
@@ -220,7 +264,48 @@ function LoginForm() {
 
       {/* TAB 1: LOGIN */}
       {tab === "login" && (
-        <form onSubmit={handleLogin} className="space-y-4 text-xs">
+        <div className="space-y-4">
+          {/* Quick Auto-Fill & 1-Click Login Card */}
+          <div className="rounded-2xl border border-cyan-500/40 bg-gradient-to-r from-cyan-950/40 via-[#0d1629] to-[#0a101f] p-3.5 space-y-2.5 shadow-lg shadow-cyan-950/40">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-white flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+                1-Click Quick Citizen Login
+              </span>
+              <span className="text-[9px] font-mono text-cyan-300 bg-cyan-500/20 border border-cyan-500/40 px-1.5 py-0.2 rounded font-bold">
+                AUTO-FILL
+              </span>
+            </div>
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
+              Auto-fill and log in immediately as founding citizen without re-typing credentials.
+            </p>
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => handleQuickLogin("CardinalSanjay")}
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-sky-500 py-2 text-xs font-bold text-black shadow-md shadow-cyan-500/20 hover:from-cyan-400 hover:to-sky-400 transition-all active:scale-95"
+              >
+                <Zap className="h-3.5 w-3.5 fill-black stroke-black" />
+                <span>Log in as CardinalSanjay</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleQuickLogin("Birtita")}
+                className="rounded-xl border border-zinc-700 bg-zinc-900/90 px-3 py-2 text-xs font-semibold text-zinc-200 hover:border-cyan-500/50 hover:text-white transition-all"
+                title="Log in as Birtita"
+              >
+                Birtita
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 my-2">
+            <div className="h-px flex-1 bg-zinc-800" />
+            <span className="text-[10px] text-zinc-500 uppercase tracking-wider">or sign in with password</span>
+            <div className="h-px flex-1 bg-zinc-800" />
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4 text-xs">
           <div>
             <label className="block font-medium text-zinc-300 mb-1.5">
               Citizen Username or Game Profile ID
@@ -276,7 +361,8 @@ function LoginForm() {
             {loading ? "Authenticating..." : "Sign In with Civix"}
           </button>
         </form>
-      )}
+      </div>
+    )}
 
       {/* TAB 2: REGISTER */}
       {tab === "register" && (

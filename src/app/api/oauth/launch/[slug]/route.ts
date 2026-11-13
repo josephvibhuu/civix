@@ -44,13 +44,30 @@ export async function GET(
       return NextResponse.redirect(new URL(`/login?return_to=${returnUrl}`, req.url));
     }
 
-    // 3. Check if app has OAuth credentials & redirect URIs configured
+    // 3. For partner apps that require internal anti-CSRF state cookie initiation (e.g. The Labour Exchange)
+    const APP_INIT_ROUTES: Record<string, string> = {
+      "the-labour-exchange": "https://jobparlamentum-app.vercel.app/api/auth/civix",
+      "colosseo": "https://colosseo-tau.vercel.app/api/auth/civix",
+      "the-back-room": "https://back-room-casino.vercel.app/auth/civix",
+    };
+
+    if (APP_INIT_ROUTES[slug]) {
+      // Auto-record authorization relation so citizen status is tracked
+      await db.execute({
+        sql: `INSERT OR IGNORE INTO civix_authorizations (id, citizen_id, app_id, scopes, revoked)
+              VALUES (?, ?, ?, 'identity', 0)`,
+        args: [`authz_${citizen.id}_${appId}`, citizen.id, appId],
+      });
+      return NextResponse.redirect(APP_INIT_ROUTES[slug]);
+    }
+
+    // 4. Check if app has OAuth credentials & redirect URIs configured
     if (!primaryRedirectUri) {
       // App doesn't have an active OAuth callback configured (e.g. external link or pending app)
       return NextResponse.redirect(appUrl);
     }
 
-    // 4. Check if citizen already authorized this app
+    // 5. Check if citizen already authorized this app
     const authzRes = await db.execute({
       sql: "SELECT * FROM civix_authorizations WHERE citizen_id = ? AND app_id = ? AND (revoked = 0 OR revoked IS NULL)",
       args: [citizen.id, appId],
