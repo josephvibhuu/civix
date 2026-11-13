@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
-import { Search, Compass, Users, Code2, Shield, ExternalLink, Zap, ArrowRight, LayoutGrid } from "lucide-react";
+import { Search, Compass, Users, Code2, Shield, ExternalLink, Zap, ArrowRight, LayoutGrid, Trophy } from "lucide-react";
 import { AppItem } from "./AppCard";
 
 interface Props {
@@ -146,6 +146,18 @@ export default function CommandPalette({ apps = [], isOpen, onClose }: Props) {
               >
                 <Users className="h-4 w-4 text-sky-400" />
                 <span>Universal Referrals</span>
+              </Command.Item>
+
+              <Command.Item
+                value="Realm Leaderboard Hall of Fame Rankings Standings"
+                onSelect={() => {
+                  onClose();
+                  router.push("/leaderboard");
+                }}
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-zinc-300 cursor-pointer hover:bg-white/5 hover:text-white transition-colors aria-selected:bg-white/5"
+              >
+                <Trophy className="h-4 w-4 text-amber-400" />
+                <span>Realm Economic Leaderboard</span>
               </Command.Item>
 
               <Command.Item

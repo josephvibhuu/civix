@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import CivixNavbar from "@/components/CivixNavbar";
+import AppReviewsSection from "@/components/store/AppReviewsSection";
 import { 
   Zap, ExternalLink, ShieldCheck, Users, ArrowLeft, 
   Sparkles, Shield, KeyRound, CheckCircle2, Lock, Layers, Calendar, ChevronRight
@@ -265,6 +266,9 @@ function AppDetailContent() {
                 </div>
               </div>
             )}
+
+            {/* Verified Citizen Reviews Section */}
+            <AppReviewsSection slug={app.slug} appName={app.name} />
           </div>
 
           {/* Right Sidebar: Security, Scopes & Authorizations */}

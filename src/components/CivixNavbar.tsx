@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { 
   Layers, Sparkles, LogIn, LogOut, Code2, Compass, Shield, 
-  Users, Bell, Search, ShieldAlert, ChevronDown, User, ExternalLink, LayoutGrid 
+  Users, Bell, Search, ShieldAlert, ChevronDown, User, ExternalLink, LayoutGrid, Trophy 
 } from "lucide-react";
 import CommandPalette from "./CommandPalette";
 import { AppItem } from "./AppCard";
@@ -160,6 +160,13 @@ export default function CivixNavbar({ apps = [] }: { apps?: AppItem[] }) {
               >
                 <Users className="h-3.5 w-3.5 text-sky-400" />
                 Referrals
+              </Link>
+              <Link
+                href="/leaderboard"
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <Trophy className="h-3.5 w-3.5 text-amber-400" />
+                Leaderboard
               </Link>
               <Link
                 href="/developers"

@@ -196,6 +196,21 @@ export async function initDb(): Promise<void> {
     );
   `);
 
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS civix_reviews (
+      id TEXT PRIMARY KEY,
+      app_id TEXT NOT NULL REFERENCES civix_apps(id),
+      citizen_id TEXT NOT NULL REFERENCES civix_citizens(id),
+      rating INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      comment TEXT NOT NULL,
+      is_verified INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(app_id, citizen_id)
+    );
+  `);
+
   // Seed default 5 ecosystem apps if not present
   const existingApps = await db.execute("SELECT COUNT(*) as count FROM civix_apps");
   const count = Number(existingApps.rows[0]?.count || 0);
@@ -379,5 +394,71 @@ export async function initDb(): Promise<void> {
         ],
       });
     }
+  }
+
+  // Seed initial reviews if none exist
+  try {
+    const reviewCountRes = await db.execute("SELECT COUNT(*) as count FROM civix_reviews");
+    if (Number(reviewCountRes.rows[0]?.count || 0) === 0) {
+      const sanjayRes = await db.execute("SELECT id FROM civix_citizens WHERE current_username = 'CardinalSanjay'");
+      const birtitaRes = await db.execute("SELECT id FROM civix_citizens WHERE current_username = 'Birtita'");
+      const sanjayId = sanjayRes.rows[0]?.id ? String(sanjayRes.rows[0].id) : null;
+      const birtitaId = birtitaRes.rows[0]?.id ? String(birtitaRes.rows[0].id) : null;
+
+      // Find GUG app id
+      const gugAppRes = await db.execute("SELECT id FROM civix_apps WHERE slug = 'grow-ur-gold'");
+      const gugId = gugAppRes.rows[0]?.id ? String(gugAppRes.rows[0].id) : "app_gug";
+
+      // Find Labour app id
+      const labourAppRes = await db.execute("SELECT id FROM civix_apps WHERE slug = 'the-labour-exchange' OR slug = 'labour-exchange'");
+      const labourId = labourAppRes.rows[0]?.id ? String(labourAppRes.rows[0].id) : "app_the-labour-exchange_a27c";
+
+      if (sanjayId) {
+        await db.execute({
+          sql: `INSERT OR IGNORE INTO civix_reviews (id, app_id, citizen_id, rating, title, comment, is_verified)
+                VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          args: [
+            "rev_init_1",
+            gugId,
+            sanjayId,
+            5,
+            "The backbone of Parlamentum financial sovereignty",
+            "Instant dividend payouts, deep liquidity on blue-chip stocks, and flawless 1-Click SSO authentication. An indispensable bourse.",
+            1,
+          ],
+        });
+        await db.execute({
+          sql: `INSERT OR IGNORE INTO civix_reviews (id, app_id, citizen_id, rating, title, comment, is_verified)
+                VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          args: [
+            "rev_init_2",
+            labourId,
+            sanjayId,
+            5,
+            "Fair contract escrow and automated wage clearing",
+            "Labour Exchange has streamlined hiring for my guild enterprises. Escrow release is instantaneous upon milestone sign-off.",
+            1,
+          ],
+        });
+      }
+
+      if (birtitaId) {
+        await db.execute({
+          sql: `INSERT OR IGNORE INTO civix_reviews (id, app_id, citizen_id, rating, title, comment, is_verified)
+                VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          args: [
+            "rev_init_3",
+            gugId,
+            birtitaId,
+            5,
+            "Order execution is fast and accurate",
+            "Limit orders fill cleanly without slippage. The dividend calendar is super transparent and easy to track.",
+            1,
+          ],
+        });
+      }
+    }
+  } catch (err) {
+    console.error("Reviews seeding notice:", err);
   }
 }
