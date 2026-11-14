@@ -1,6 +1,7 @@
 import { NextResponse, connection } from "next/server";
 import { getDb, initDb } from "@/lib/db";
 import { getCurrentCitizen } from "@/lib/auth";
+import { hashClientSecret, randomToken } from "@/lib/security";
 
 export async function GET(req: Request) {
   await connection();
@@ -70,16 +71,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required app details" }, { status: 400 });
     }
 
+    // Redirect URI must be a real https URL (http only allowed for localhost testing)
+    try {
+      const u = new URL(String(redirectUri).trim());
+      const isLocal = u.hostname === "localhost" || u.hostname === "127.0.0.1";
+      if (u.protocol !== "https:" && !(isLocal && u.protocol === "http:")) throw new Error();
+    } catch {
+      return NextResponse.json({ error: "Redirect URI must be a full https:// URL" }, { status: 400 });
+    }
+
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-    const appId = `app_${slug}_${Math.random().toString(36).substring(2, 6)}`;
-    const clientId = `civ_client_${slug}_${Math.random().toString(36).substring(2, 8)}`;
-    const clientSecret = `civ_sec_${Math.random().toString(36).substring(2, 10)}${Math.random().toString(36).substring(2, 10)}`;
+    const appId = `app_${slug}_${randomToken(4)}`;
+    const clientId = `civ_client_${slug}_${randomToken(6)}`;
+    const clientSecret = `civ_sec_${randomToken(32)}`;
 
     await db.execute({
       sql: `INSERT INTO civix_apps (
         id, name, slug, tagline, description, category, app_url, client_id,
         client_secret_hash, redirect_uris, owner_name, active_users_estimate, featured, verified, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0, 1, 'active')`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0, 0, 'pending')`,
       args: [
         appId,
         name.trim(),
@@ -89,7 +99,7 @@ export async function POST(req: Request) {
         category || "utility",
         appUrl.trim(),
         clientId,
-        clientSecret,
+        hashClientSecret(clientSecret), // store only the hash
         JSON.stringify([redirectUri.trim()]),
         citizen.currentUsername,
       ],
@@ -104,7 +114,7 @@ export async function POST(req: Request) {
         clientSecret, // Returned once upon creation
         redirectUri: redirectUri.trim(),
       },
-      message: "App registered successfully! Save your client secret securely.",
+      message: "App registered! It will go live once an admin approves it. Save your client secret now; it won't be shown again.",
     });
   } catch (error: any) {
     console.error("Register app error:", error);

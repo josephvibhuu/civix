@@ -2,21 +2,24 @@ import { NextResponse } from "next/server";
 import { getDb, initDb } from "@/lib/db";
 import { logSecurityEvent } from "@/lib/auth";
 import { SignJWT } from "jose";
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.CIVIX_JWT_SECRET || "civix-super-secure-parlamentum-secret-key-998811"
-);
+import { checkClientSecret, getOAuthSecret, hashClientSecret } from "@/lib/security";
 
 export async function POST(req: Request) {
   try {
     await initDb();
     const db = getDb();
-    const body = await req.json();
+    let body: any = {};
+    const contentType = req.headers.get("content-type") || "";
+    if (contentType.includes("application/x-www-form-urlencoded")) {
+      body = Object.fromEntries((await req.formData()).entries());
+    } else {
+      body = await req.json().catch(() => ({}));
+    }
 
-    const { code, client_id, client_secret } = body;
+    const { code, client_id, client_secret, redirect_uri } = body;
 
-    if (!code || !client_id) {
-      return NextResponse.json({ error: "Missing authorization code or client_id" }, { status: 400 });
+    if (!code || !client_id || !client_secret) {
+      return NextResponse.json({ error: "Missing code, client_id or client_secret" }, { status: 400 });
     }
 
     // Verify app client credentials
@@ -31,9 +34,18 @@ export async function POST(req: Request) {
 
     const app = appRes.rows[0];
 
-    // Optional: client_secret verification for non-public clients
-    if (client_secret && client_secret !== String(app.client_secret_hash)) {
+    // SECURITY: client_secret is now REQUIRED. Before, leaving it out skipped the check,
+    // so anyone holding a stolen auth code could trade it for a token.
+    const secretCheck = checkClientSecret(String(client_secret), String(app.client_secret_hash || ""));
+    if (!secretCheck.ok) {
       return NextResponse.json({ error: "Invalid client_secret" }, { status: 401 });
+    }
+    if (secretCheck.needsUpgrade) {
+      // Old plain-text secret matched: re-save it hashed
+      await db.execute({
+        sql: "UPDATE civix_apps SET client_secret_hash = ? WHERE id = ?",
+        args: [hashClientSecret(String(client_secret)), String(app.id)],
+      });
     }
 
     // Verify auth code
@@ -47,13 +59,21 @@ export async function POST(req: Request) {
     }
 
     const authRecord = codeRes.rows[0];
+
+    // If the client sends redirect_uri (RFC 6749 4.1.3), it must match the one the code was issued for
+    if (redirect_uri && String(redirect_uri) !== String(authRecord.redirect_uri)) {
+      return NextResponse.json({ error: "redirect_uri mismatch" }, { status: 400 });
+    }
     const scopes = String(authRecord.scope || "identity").split(/[\s,]+/);
 
-    // Mark code as used
-    await db.execute({
-      sql: "UPDATE civix_auth_codes SET used = 1 WHERE code = ?",
+    // Mark code as used (only succeeds once, so two parallel requests can't both use it)
+    const useRes = await db.execute({
+      sql: "UPDATE civix_auth_codes SET used = 1 WHERE code = ? AND used = 0",
       args: [code],
     });
+    if (useRes.rowsAffected === 0) {
+      return NextResponse.json({ error: "Invalid or expired authorization code" }, { status: 400 });
+    }
 
     // Fetch full citizen record
     const citizenRes = await db.execute({
@@ -130,7 +150,7 @@ export async function POST(req: Request) {
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
       .setExpirationTime("24h")
-      .sign(JWT_SECRET);
+      .sign(getOAuthSecret());
 
     return NextResponse.json({
       access_token: idToken,

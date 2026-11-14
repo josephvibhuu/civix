@@ -398,7 +398,7 @@ export async function GET(req) {
                   Session Revocation & Logout (<code className="text-indigo-300">RFC 7009</code>)
                 </h3>
                 <button
-                  onClick={() => copyToClipboard(`await fetch("https://civix-plum.vercel.app/api/oauth/revoke", {\n  method: "POST",\n  headers: { "Content-Type": "application/json" },\n  body: JSON.stringify({\n    token: authCodeOrSessionToken,\n    client_id: process.env.CIVIX_CLIENT_ID,\n    citizen_id: citizen.id\n  })\n});`, "step4")}
+                  onClick={() => copyToClipboard(`await fetch("https://civix-plum.vercel.app/api/oauth/revoke", {\n  method: "POST",\n  headers: { "Content-Type": "application/json" },\n  body: JSON.stringify({\n    token: authCodeOrSessionToken,\n    client_id: process.env.CIVIX_CLIENT_ID,\n    client_secret: process.env.CIVIX_CLIENT_SECRET,\n    citizen_id: citizen.id\n  })\n});`, "step4")}
                   className="text-xs text-zinc-400 hover:text-cyan-300 flex items-center gap-1"
                 >
                   <Copy className="h-3 w-3" /> Copy
@@ -415,6 +415,7 @@ await fetch("https://civix-plum.vercel.app/api/oauth/revoke", {
   body: JSON.stringify({
     token: authCodeOrSessionToken,
     client_id: process.env.CIVIX_CLIENT_ID,
+    client_secret: process.env.CIVIX_CLIENT_SECRET,
     citizen_id: citizen.id
   })
 });

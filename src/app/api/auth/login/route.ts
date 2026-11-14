@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { SESSION_MAX_AGE_SECONDS } from "@/lib/security";
 import { getDb, initDb } from "@/lib/db";
 import { verifyPassword, createSessionToken, logSecurityEvent } from "@/lib/auth";
 
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
-      maxAge: 60 * 60 * 24 * 60, // 60 days
+      maxAge: SESSION_MAX_AGE_SECONDS, // 30 days, matches JWT expiry
       path: "/",
     });
 

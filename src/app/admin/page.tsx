@@ -21,12 +21,17 @@ interface AdminData {
   citizens: any[];
   recentAuthCodes: any[];
   banners: any[];
+  pendingVerifications?: any[];
 }
 
 export default function AdminPage() {
   const [data, setData] = useState<AdminData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"apps" | "citizens" | "banners" | "audit">("apps");
+  const [activeTab, setActiveTab] = useState<"apps" | "citizens" | "banners" | "audit" | "security">("apps");
+
+  // Account recovery lookup state
+  const [recMemo, setRecMemo] = useState("");
+  const [recResult, setRecResult] = useState<any | null>(null);
 
   // New banner modal state
   const [showBannerModal, setShowBannerModal] = useState(false);
@@ -101,6 +106,57 @@ export default function AdminPage() {
       const d = await res.json();
       if (!res.ok) throw new Error(d.error || "Update failed");
       toast.success(`Citizen tier updated to ${tier}`);
+      fetchAdminData();
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  };
+
+  const [rotatedSecret, setRotatedSecret] = useState<{ appName: string; secret: string } | null>(null);
+
+  const handleRotateSecret = async (appId: string, appName: string) => {
+    if (!window.confirm(`Make a new client secret for ${appName}? The old one stops working immediately.`)) return;
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "rotate_client_secret", appId }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || "Rotate failed");
+      setRotatedSecret({ appName, secret: d.clientSecret });
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  };
+
+  const handleLookupRecovery = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setRecResult(null);
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "lookup_recovery", memo: recMemo.trim() }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || "Lookup failed");
+      setRecResult(d.recovery);
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  };
+
+  const handleReviewVerification = async (requestId: string, approve: boolean) => {
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "review_verification", requestId, approve }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || "Review failed");
+      toast.success(d.message);
       fetchAdminData();
     } catch (e: any) {
       toast.error(e.message);
@@ -226,6 +282,14 @@ export default function AdminPage() {
           </div>
         </div>
 
+        {rotatedSecret && (
+          <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-xs space-y-2">
+            <div className="font-bold text-amber-200">New client secret for {rotatedSecret.appName} (shown once — copy it now):</div>
+            <div className="font-mono text-white break-all select-all">{rotatedSecret.secret}</div>
+            <button onClick={() => setRotatedSecret(null)} className="text-amber-300 underline">I've saved it</button>
+          </div>
+        )}
+
         {/* Navigation Tabs */}
         <div className="flex items-center gap-2 border-b border-zinc-800 pb-3">
           {[
@@ -233,6 +297,7 @@ export default function AdminPage() {
             { id: "citizens" as const, label: `Citizens (${citizens.length})` },
             { id: "banners" as const, label: `Spotlight Banners (${banners.length})` },
             { id: "audit" as const, label: `OAuth Audit (${recentAuthCodes.length})` },
+            { id: "security" as const, label: `Security (${(data?.pendingVerifications || []).length})` },
           ].map((t) => (
             <button
               key={t.id}
@@ -296,6 +361,12 @@ export default function AdminPage() {
                         </button>
                       </td>
                       <td className="p-3.5 text-right space-x-2">
+                        <button
+                          onClick={() => handleRotateSecret(app.id, app.name)}
+                          className="rounded-lg bg-amber-500/15 px-2 py-1 text-[10px] font-bold text-amber-300 hover:bg-amber-500/25"
+                        >
+                          Rotate secret
+                        </button>
                         <Link
                           href={`/app/${app.slug}`}
                           className="inline-flex items-center gap-1 text-[11px] text-cyan-400 hover:underline"
@@ -534,6 +605,82 @@ export default function AdminPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+        {/* TAB 5: SECURITY — account recovery + verification review */}
+        {activeTab === "security" && (
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-zinc-800 bg-[#0c121e]/80 p-5 shadow-xl space-y-4">
+              <div>
+                <h3 className="text-base font-bold text-white">Account Recovery Lookup</h3>
+                <p className="text-xs text-zinc-400 mt-1">
+                  Only do this after you have seen the in-game notary contract with this memo, sent FROM the
+                  game profile shown below. Then send the code privately (e.g. Discord DM) to that citizen.
+                </p>
+              </div>
+              <form onSubmit={handleLookupRecovery} className="flex gap-2">
+                <input
+                  value={recMemo}
+                  onChange={(e) => setRecMemo(e.target.value)}
+                  placeholder="CIVIX-REC-XXXXXXXX"
+                  className="flex-1 rounded-xl border border-zinc-700 bg-black/40 px-3 py-2 text-sm font-mono text-white"
+                />
+                <button type="submit" className="rounded-xl bg-cyan-500 px-4 py-2 text-xs font-bold text-black">
+                  Look up
+                </button>
+              </form>
+              {recResult && (
+                <div className="rounded-xl border border-zinc-800 bg-black/40 p-4 text-xs font-mono space-y-1 text-zinc-300">
+                  <div>Citizen: <span className="text-white">{recResult.username}</span></div>
+                  <div>Game profile ID: <span className="text-white">{recResult.gameProfileId}</span></div>
+                  <div>Discord: <span className="text-white">{recResult.discordId || "—"}</span></div>
+                  <div>Status: <span className="text-amber-300">{recResult.status}</span> · wrong attempts: {recResult.attempts}</div>
+                  <div>
+                    Code:{" "}
+                    <span className="text-emerald-300 text-base">{recResult.code || "(not available — expired or used)"}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-2xl border border-zinc-800 bg-[#0c121e]/80 overflow-hidden shadow-xl">
+              <div className="p-5 border-b border-zinc-800">
+                <h3 className="text-base font-bold text-white">Verification Requests Awaiting Review</h3>
+                <p className="text-xs text-zinc-400 mt-1">Check the notary contract in-game before approving.</p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-mono">
+                  <thead className="border-b border-zinc-800 bg-black/40 text-[10px] uppercase tracking-wider text-zinc-400">
+                    <tr>
+                      <th className="p-3">Citizen</th>
+                      <th className="p-3">Game ID</th>
+                      <th className="p-3">Tier</th>
+                      <th className="p-3">Memo</th>
+                      <th className="p-3">Proof</th>
+                      <th className="p-3"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800/60 text-[11px]">
+                    {(data?.pendingVerifications || []).length === 0 && (
+                      <tr><td colSpan={6} className="p-4 text-zinc-500">Nothing waiting.</td></tr>
+                    )}
+                    {(data?.pendingVerifications || []).map((v: any) => (
+                      <tr key={v.id} className="hover:bg-white/5">
+                        <td className="p-3 text-white">{v.current_username}</td>
+                        <td className="p-3 text-zinc-400">{v.game_profile_id}</td>
+                        <td className="p-3 text-emerald-400">{v.target_tier}</td>
+                        <td className="p-3 text-cyan-300">{v.contract_memo}</td>
+                        <td className="p-3 text-zinc-300 break-all max-w-[200px]">{v.proof_tx}</td>
+                        <td className="p-3 whitespace-nowrap space-x-2">
+                          <button onClick={() => handleReviewVerification(v.id, true)} className="rounded-lg bg-emerald-500/20 px-2 py-1 text-emerald-300">Approve</button>
+                          <button onClick={() => handleReviewVerification(v.id, false)} className="rounded-lg bg-red-500/20 px-2 py-1 text-red-300">Reject</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}

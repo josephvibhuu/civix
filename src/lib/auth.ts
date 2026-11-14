@@ -2,10 +2,7 @@ import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { getDb, initDb } from "./db";
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.CIVIX_JWT_SECRET || "civix-hardened-session-auth-key-20261114-revoked-previous-sessions-v3"
-);
+import { getSessionSecret } from "./security";
 
 export interface CivixCitizen {
   id: string;
@@ -39,12 +36,12 @@ export async function createSessionToken(citizen: { id: string; username: string
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("30d")
-    .sign(JWT_SECRET);
+    .sign(getSessionSecret());
 }
 
 export async function verifySessionToken(token: string): Promise<{ sub: string; username: string; gameProfileId: string } | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getSessionSecret(), { algorithms: ["HS256"] });
     return {
       sub: payload.sub as string,
       username: payload.username as string,

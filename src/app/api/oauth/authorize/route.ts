@@ -1,6 +1,7 @@
 import { NextResponse, connection } from "next/server";
 import { getDb, initDb } from "@/lib/db";
 import { getCurrentCitizen } from "@/lib/auth";
+import { isAllowedRedirect, parseRedirectUris, randomToken } from "@/lib/security";
 
 export async function GET(req: Request) {
   await connection();
@@ -30,6 +31,16 @@ export async function GET(req: Request) {
 
     const app = appRes.rows[0];
 
+    // SECURITY: only redirect to a URI the app registered. Otherwise anyone could
+    // craft a link that sends a logged-in citizen's auth code to their own site.
+    if (!isAllowedRedirect(redirectUri, parseRedirectUris(app.redirect_uris))) {
+      return NextResponse.json({ error: "redirect_uri is not registered for this client_id" }, { status: 400 });
+    }
+
+    if (String(app.status) !== "active") {
+      return NextResponse.json({ error: "This app is not active" }, { status: 403 });
+    }
+
     // Check if citizen is currently logged in
     const citizen = await getCurrentCitizen();
     if (!citizen) {
@@ -39,7 +50,7 @@ export async function GET(req: Request) {
     }
 
     // Citizen is logged in -> Issue authorization code
-    const authCode = `auth_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
+    const authCode = `auth_${randomToken(24)}`;
     const expiresAt = Date.now() + 1000 * 60 * 5; // 5 minutes
 
     await db.execute({

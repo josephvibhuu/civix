@@ -1,6 +1,7 @@
 import { NextResponse, connection } from "next/server";
 import { getDb, initDb } from "@/lib/db";
 import { getCurrentCitizen, logSecurityEvent } from "@/lib/auth";
+import { randomToken } from "@/lib/security";
 
 export async function GET(
   req: Request,
@@ -62,7 +63,8 @@ export async function GET(
     }
 
     // 4. Check if app has OAuth credentials & redirect URIs configured
-    if (!primaryRedirectUri) {
+    // Never hand out auth codes for apps an admin hasn't approved
+    if (!primaryRedirectUri || String(app.status) !== "active") {
       // App doesn't have an active OAuth callback configured (e.g. external link or pending app)
       return NextResponse.redirect(appUrl);
     }
@@ -76,7 +78,7 @@ export async function GET(
     if (authzRes.rows.length > 0) {
       // INSTANT 1-CLICK LAUNCH: Already authorized!
       const existingScope = String(authzRes.rows[0].scopes || "identity");
-      const authCode = `auth_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
+      const authCode = `auth_${randomToken(24)}`;
       const expiresAt = Date.now() + 1000 * 60 * 5; // 5 mins
 
       await db.execute({
@@ -103,7 +105,7 @@ export async function GET(
     // 5. First time launching this app: Auto-authorize or redirect through OAuth consent
     // For verified ecosystem apps, we can auto-grant identity scope with seamless onboarding
     const defaultScope = "identity";
-    const authCode = `auth_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
+    const authCode = `auth_${randomToken(24)}`;
     const expiresAt = Date.now() + 1000 * 60 * 5;
 
     await db.execute({

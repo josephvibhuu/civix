@@ -195,6 +195,9 @@ export async function initDb(): Promise<void> {
       created_at TEXT DEFAULT (datetime('now'))
     );
   `);
+  try {
+    await db.execute("ALTER TABLE civix_recovery_requests ADD COLUMN attempts INTEGER DEFAULT 0");
+  } catch {}
 
   await db.execute(`
     CREATE TABLE IF NOT EXISTS civix_reviews (

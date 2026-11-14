@@ -1,6 +1,9 @@
 import { NextResponse, connection } from "next/server";
 import { getDb, initDb } from "@/lib/db";
 import { getCurrentCitizen, logSecurityEvent } from "@/lib/auth";
+import { randomToken } from "@/lib/security";
+
+const UPGRADE_TIERS = ["tier_2_bank_verified", "tier_3_sovereign"];
 
 export async function GET() {
   await connection();
@@ -77,10 +80,13 @@ export async function POST(req: Request) {
 
     if (action === "create_challenge") {
       const targetTier = String(body.targetTier || "tier_2_bank_verified");
-      const randomNonce = Math.random().toString(36).substring(2, 7).toUpperCase();
+      if (!UPGRADE_TIERS.includes(targetTier)) {
+        return NextResponse.json({ error: "Unknown verification tier." }, { status: 400 });
+      }
+      const randomNonce = randomToken(6).toUpperCase();
       const challengeCode = `CIVIX-NOTARY-${randomNonce}`;
       const contractMemo = `CIVIX-KYC:${citizen.gameProfileId}:${challengeCode}`;
-      const requestId = `vreq_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 6)}`;
+      const requestId = `vreq_${randomToken(12)}`;
 
       await db.execute({
         sql: `INSERT INTO civix_verification_requests 
@@ -127,46 +133,32 @@ export async function POST(req: Request) {
       }
 
       const vReq = reqRes.rows[0];
-      const targetTier = String(vReq.target_tier);
+      if (String(vReq.status) !== "pending") {
+        return NextResponse.json({ error: "This request has already been submitted or reviewed." }, { status: 409 });
+      }
 
-      // Verify and upgrade citizen
+      // SECURITY: a typed-in TX hash proves nothing on its own, so we no longer
+      // upgrade the tier here. The request is queued for an admin to check the
+      // in-game notary contract and approve it from the admin panel.
       await db.execute({
-        sql: `UPDATE civix_verification_requests 
-              SET proof_tx = ?, status = 'verified', verified_at = datetime('now'), notes = 'Cryptographic memo verified on Parlamentum ledger'
+        sql: `UPDATE civix_verification_requests
+              SET proof_tx = ?, status = 'submitted', notes = 'Proof submitted, awaiting admin review'
               WHERE id = ?`,
-        args: [proofTx, requestId],
-      });
-
-      await db.execute({
-        sql: "UPDATE civix_citizens SET verification_tier = ?, updated_at = datetime('now') WHERE id = ?",
-        args: [targetTier, citizen.id],
-      });
-
-      // Insert celebratory notification
-      const tierLabel = targetTier === "tier_2_bank_verified" ? "Tier 2 (Bank Verified)" : "Tier 3 (Sovereign Elite)";
-      await db.execute({
-        sql: `INSERT INTO civix_notifications (id, citizen_id, title, message, type, action_url)
-              VALUES (?, ?, ?, ?, 'success', '/dashboard')`,
-        args: [
-          `notif_kyc_${Date.now().toString(36)}`,
-          citizen.id,
-          `🏛️ KYC Upgrade Approved: ${tierLabel}`,
-          `Your notary challenge has been validated. You now enjoy uncollateralized credit and institutional privileges across all Parlamentum bourses.`,
-        ],
+        args: [proofTx.slice(0, 200), requestId],
       });
 
       await logSecurityEvent(
         citizen.id,
-        "kyc_tier_upgraded",
+        "kyc_proof_submitted",
         undefined,
         undefined,
-        `Upgraded citizen to ${targetTier} with TX ${proofTx}`
+        `Submitted proof TX for ${String(vReq.target_tier)}`
       );
 
       return NextResponse.json({
         success: true,
-        message: `Passport upgraded to ${tierLabel}!`,
-        newTier: targetTier,
+        message: "Proof submitted! An administrator will check your notary contract and approve your upgrade.",
+        status: "submitted",
       });
     }
 
