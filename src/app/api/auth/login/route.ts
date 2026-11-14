@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb, initDb } from "@/lib/db";
-import { verifyPassword, createSessionToken, syncInGameUsername, logSecurityEvent } from "@/lib/auth";
+import { verifyPassword, createSessionToken, logSecurityEvent } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     const db = getDb();
     const body = await req.json();
 
-    const { identifier, password, currentInGameName } = body;
+    const { identifier, password } = body;
 
     if (!identifier || !password) {
       return NextResponse.json({ error: "Identifier and password are required." }, { status: 400 });
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     // Search by gameProfileId OR currentUsername
     const res = await db.execute({
       sql: `SELECT * FROM civix_citizens 
-            WHERE game_profile_id = ? OR LOWER(current_username) = LOWER(?)`,
+            WHERE game_profile_id = ? OR LOWER(current_username) = LOWER(?) LIMIT 1`,
       args: [cleanId, cleanId],
     });
 
@@ -34,14 +34,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid credentials. Password incorrect." }, { status: 401 });
     }
 
-    // Auto-detect and sync if user provided an updated in-game name
-    if (currentInGameName && currentInGameName.trim()) {
-      await syncInGameUsername(String(citizen.game_profile_id), currentInGameName.trim());
-    }
-
     const token = await createSessionToken({
       id: String(citizen.id),
-      username: currentInGameName ? currentInGameName.trim() : String(citizen.current_username),
+      username: String(citizen.current_username),
       gameProfileId: String(citizen.game_profile_id),
     });
 

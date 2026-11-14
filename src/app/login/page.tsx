@@ -18,7 +18,6 @@ function LoginForm() {
   // Login form state
   const [loginId, setLoginId] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [updatedInGameName, setUpdatedInGameName] = useState("");
 
   // Register form state
   const [regUsername, setRegUsername] = useState("");
@@ -44,36 +43,7 @@ function LoginForm() {
     } catch {}
   }, []);
 
-  const handleQuickLogin = async (username: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/auth/quick-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Quick login failed");
 
-      try {
-        localStorage.setItem("civix_last_user", username);
-      } catch {}
-
-      setSuccess(`Authenticated as ${username}! Resuming...`);
-      setTimeout(() => {
-        if (returnTo.startsWith("http") || returnTo.startsWith("/api")) {
-          window.location.href = returnTo;
-        } else {
-          router.push(returnTo);
-        }
-      }, 400);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +56,6 @@ function LoginForm() {
         body: JSON.stringify({
           identifier: loginId,
           password: loginPassword,
-          currentInGameName: updatedInGameName,
         }),
       });
       const data = await res.json();
@@ -278,45 +247,7 @@ function LoginForm() {
             </div>
           )}
 
-          {/* Quick Auto-Fill & 1-Click Login Card */}
-          <div className="rounded-2xl border border-cyan-500/40 bg-gradient-to-r from-cyan-950/40 via-[#0d1629] to-[#0a101f] p-3.5 space-y-2.5 shadow-lg shadow-cyan-950/40">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-white flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
-                1-Click Quick Citizen Login
-              </span>
-              <span className="text-[9px] font-mono text-cyan-300 bg-cyan-500/20 border border-cyan-500/40 px-1.5 py-0.2 rounded font-bold">
-                AUTO-FILL
-              </span>
-            </div>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              Auto-fill and log in immediately as founding citizen without re-typing credentials.
-            </p>
-            <div className="flex items-center gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => handleQuickLogin(loginId || "CardinalSanjay")}
-                className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-sky-500 py-2 text-xs font-bold text-black shadow-md shadow-cyan-500/20 hover:from-cyan-400 hover:to-sky-400 transition-all active:scale-95"
-              >
-                <Zap className="h-3.5 w-3.5 fill-black stroke-black" />
-                <span>Log in as {loginId || "CardinalSanjay"}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickLogin(loginId === "Birtita" ? "CardinalSanjay" : "Birtita")}
-                className="rounded-xl border border-zinc-700 bg-zinc-900/90 px-3 py-2 text-xs font-semibold text-zinc-200 hover:border-cyan-500/50 hover:text-white transition-all"
-                title={`Switch to ${loginId === "Birtita" ? "CardinalSanjay" : "Birtita"}`}
-              >
-                {loginId === "Birtita" ? "CardinalSanjay" : "Birtita"}
-              </button>
-            </div>
-          </div>
 
-          <div className="flex items-center gap-3 my-2">
-            <div className="h-px flex-1 bg-zinc-800" />
-            <span className="text-[10px] text-zinc-500 uppercase tracking-wider">or sign in with password</span>
-            <div className="h-px flex-1 bg-zinc-800" />
-          </div>
 
           <form onSubmit={handleLogin} className="space-y-4 text-xs">
           <div>
@@ -343,27 +274,6 @@ function LoginForm() {
               onChange={(e) => setLoginPassword(e.target.value)}
               className="w-full rounded-xl border border-zinc-800 bg-black p-2.5 text-zinc-100 placeholder-zinc-600 outline-none focus:border-cyan-400"
             />
-          </div>
-
-          <div className="pt-1">
-            <details className="text-[11px] text-zinc-400 group">
-              <summary className="cursor-pointer text-cyan-400 hover:text-cyan-300 font-medium">
-                Changed your in-game name recently? (Click to sync)
-              </summary>
-              <div className="mt-2 p-2.5 rounded-xl border border-zinc-800 bg-black/80">
-                <label className="block text-zinc-300 mb-1">New in-game handle:</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Dinomite_New"
-                  value={updatedInGameName}
-                  onChange={(e) => setUpdatedInGameName(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-900 p-1.5 text-zinc-100"
-                />
-                <p className="mt-1 text-[10px] text-zinc-500">
-                  Civix will automatically update your display name across GUG and all connected apps.
-                </p>
-              </div>
-            </details>
           </div>
 
           <button

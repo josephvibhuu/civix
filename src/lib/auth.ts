@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { getDb, initDb } from "./db";
 
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.CIVIX_JWT_SECRET || "civix-super-secure-parlamentum-secret-key-998811"
+  process.env.CIVIX_JWT_SECRET || "civix-hardened-session-auth-key-20261114-revoked-previous-sessions-v3"
 );
 
 export interface CivixCitizen {
@@ -133,6 +133,16 @@ export async function syncInGameUsername(gameProfileId: string, newInGameUsernam
   const citizenId = String(citizenRes.rows[0].id);
 
   if (current.toLowerCase() !== newInGameUsername.toLowerCase()) {
+    // Strictly prevent collision with another registered citizen
+    const collisionRes = await db.execute({
+      sql: "SELECT id FROM civix_citizens WHERE LOWER(current_username) = LOWER(?) AND id != ?",
+      args: [newInGameUsername, citizenId],
+    });
+    if (collisionRes.rows.length > 0) {
+      console.warn(`Rename rejected: "${newInGameUsername}" is already taken by citizen ${collisionRes.rows[0].id}`);
+      return false;
+    }
+
     // Record rename history
     const historyId = `ren_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
     await db.execute({
